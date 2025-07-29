@@ -49,7 +49,8 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
           borderRadius: 36,
           background:
             "linear-gradient(120deg, #ff5b9f 0%, #ffd36e 40%, #4fc6ff 80%, #a66bff 100%)",
-          boxShadow: "0 0 42px 14px #ff4fc680, 0 14px 42px 0 rgba(46,16,101,0.13)",
+          boxShadow:
+            "0 0 42px 14px #ff4fc680, 0 14px 42px 0 rgba(46,16,101,0.13)",
           maxWidth: 440,
           width: "95vw",
           maxHeight: "94vh",
@@ -74,6 +75,9 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
           }}
         >
           {/* Título */}
+          <Title order={2} fw={300} ta="center" mb={16}>
+            Instruccion 1/3
+          </Title>
           <Title
             fw={600}
             ta="center"
@@ -174,7 +178,7 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
 
           {/* Botón para tomar selfie */}
           <button
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => next()}
             style={{
               marginTop: 6,
               width: "100%",
@@ -191,7 +195,7 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
               transition: "background .18s",
             }}
           >
-            Tomar selfie
+            Siguiente instrucción
           </button>
           {/* Input oculto */}
           <input

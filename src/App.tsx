@@ -24,19 +24,31 @@ function App() {
           {step === 1 && (
             <StepUploadPhoto next={next} prev={prev} setPhoto={setPhoto} />
           )}
-          {step === 2 && <StepLoading next={next} />}
+          {step === 2 && <StepSuccess next={next} goTo={goTo} photo={photo} />}
           {step === 3 && (
-            <StepSuccess next={next} goTo={goTo} photo={photo} />
-          )}
-          {step === 4 && (
             <StepCustomize
               photo={photo}
+              setPhoto={(img) => {
+                setPhoto(img); // Actualiza la foto
+                setStep(4); // Pasa al loader inmediatamente
+              }}
               setCustomStyle={setCustomStyle}
               next={next}
               prev={prev}
             />
           )}
-          {step === 5 && <StepFinish avatar={customStyle as string} />}
+          {step === 4 && <StepLoading next={next} />}
+          {step === 5 && (
+            <StepFinish
+              avatar={customStyle as string}
+              photo={photo}
+              onRestart={() => {
+                setStep(0);
+                setPhoto(null);
+                setCustomStyle(null);
+              }}
+            />
+          )}
         </Paper>
       </Container>
     </MantineProvider>

@@ -1,3 +1,5 @@
+import { Button } from "@mantine/core";
+
 const fondo = "/FONDO-HOME.png";
 const textos = "/TEXTOS_HOME.png";
 
@@ -19,10 +21,7 @@ export default function StepWelcome({ next }: { next: () => void }) {
         alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
-        cursor: "pointer",
-        touchAction: "manipulation", // mejora el tap en móvil
       }}
-      onClick={next}
     >
       <div
         style={{
@@ -38,10 +37,10 @@ export default function StepWelcome({ next }: { next: () => void }) {
           src={textos}
           alt="GOAT FACE moto ai"
           style={{
-            width: "min(97vw, 460px)",    // Máximo ancho fijo en desktop, nunca desborda en móvil
+            width: "min(97vw, 460px)",
             height: "auto",
-            maxHeight: "85vh",            // Máximo alto en pantalla
-            aspectRatio: "9/16",          // Mantiene relación vertical (útil para mobile)
+            maxHeight: "85vh",
+            aspectRatio: "9/16",
             display: "block",
             position: "absolute",
             left: "50%",
@@ -50,20 +49,54 @@ export default function StepWelcome({ next }: { next: () => void }) {
             zIndex: 2,
             pointerEvents: "none",
             userSelect: "none",
-
           }}
           draggable={false}
         />
+        {/* Botón fijo al fondo, centrado horizontal y padding responsive */}
+        <Button
+          size="xl"
+          radius="xl"
+          onClick={next}
+          style={{
+            position: "fixed",
+            left: "50%",
+            bottom: 32,
+            transform: "translateX(-50%)",
+            padding: "18px 60px",
+            fontWeight: 800,
+            fontSize: 22,
+            letterSpacing: 1,
+            background: "linear-gradient(90deg, #ff7a18, #ffb199 80%)",
+            color: "#fff",
+            boxShadow: "0 4px 18px 0 rgba(0,0,0,0.25)",
+            border: "none",
+            zIndex: 10,
+            transition: "background 0.2s, box-shadow 0.2s, transform 0.1s",
+            cursor: "pointer",
+          }}
+          // Efecto visual en hover/active (desktop)
+          onMouseDown={e => e.currentTarget.style.transform = "translateX(-50%) scale(0.96)"}
+          onMouseUp={e => e.currentTarget.style.transform = "translateX(-50%)"}
+          onMouseLeave={e => e.currentTarget.style.transform = "translateX(-50%)"}
+        >
+          Comenzar
+        </Button>
       </div>
-      {/* Media query CSS para asegurar aún mejor el ajuste en móviles */}
+      {/* Media query para imagen y botón mobile */}
       <style>
         {`
           @media (max-width: 600px) {
             img[alt="GOAT FACE moto ai"] {
               width: 99vw !important;
               max-width: 99vw !important;
-              max-height: 92vh !important;
+              max-height: 82vh !important;
               aspect-ratio: 9/16 !important;
+            }
+            button {
+              font-size: 18px !important;
+              padding: 16px 0 !important;
+              width: 92vw !important;
+              min-width: 0 !important;
             }
           }
         `}

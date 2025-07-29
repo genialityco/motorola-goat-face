@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { Title } from "@mantine/core";
+import { useRef, useState } from "react";
 
 const logo = "/LOGO_MOTO_IA.png";
 
@@ -13,23 +14,34 @@ const avatarStyles = [
 interface Props {
   photo: string | null;
   setCustomStyle: (est: string) => void;
+  setPhoto: (photo: string | null) => void; // <-- NUEVO!
   next: () => void;
   prev: () => void;
 }
 
-export default function StepCustomize({
-  photo,
-  setCustomStyle,
-  next,
-  // prev,
-}: Props) {
+export default function StepCustomize({ photo, setPhoto }: Props) {
   const [current, setCurrent] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleLeft = () =>
     setCurrent((i) => (i === 0 ? avatarStyles.length - 1 : i - 1));
   const handleRight = () =>
     setCurrent((i) => (i === avatarStyles.length - 1 ? 0 : i + 1));
   const handleSelect = (idx: number) => setCurrent(idx);
+
+  // Abrir input archivo al hacer click en Simular
+  const handleSimularClick = () => {
+    if (fileInputRef.current) fileInputRef.current.click();
+  };
+
+  // Cargar la imagen y convertir a dataURL
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => setPhoto(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
 
   return (
     <div
@@ -49,7 +61,7 @@ export default function StepCustomize({
         overflow: "hidden",
       }}
     >
-      {/* Contenido principal scrollable si es necesario */}
+      {/* Contenido principal */}
       <div
         style={{
           flex: "1 1 0",
@@ -63,7 +75,13 @@ export default function StepCustomize({
         }}
       >
         {/* Logo y textos */}
-        <div style={{ width: "100%", textAlign: "center", marginBottom: "clamp(16px, 4vw, 34px)" }}>
+        <div
+          style={{
+            width: "100%",
+            textAlign: "center",
+            marginBottom: "clamp(16px, 4vw, 34px)",
+          }}
+        >
           <img
             src={logo}
             alt="Logo moto ai"
@@ -76,6 +94,9 @@ export default function StepCustomize({
             }}
             draggable={false}
           />
+          <Title order={1} fw={300} ta="center" c="white" mb={16}>
+            Instruccion 3/3
+          </Title>
           <div
             style={{
               color: "#fff",
@@ -97,7 +118,7 @@ export default function StepCustomize({
           >
             Elige el estilo IA que más
             <br />
-            te guste y elige “Guardar”
+            te guste y elige “Simular”
           </div>
         </div>
 
@@ -114,10 +135,11 @@ export default function StepCustomize({
             justifyContent: "center",
             boxShadow: "0 2px 22px #1b2241cc",
             marginBottom: "clamp(18px, 4vw, 36px)",
+            overflow: "hidden",
           }}
         >
           <img
-            src={avatarStyles[current]?.url || photo || ""}
+            src={photo || avatarStyles[current]?.url}
             alt="Avatar IA"
             style={{
               width: "100%",
@@ -130,13 +152,15 @@ export default function StepCustomize({
         </div>
 
         {/* Carrusel de estilos */}
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          margin: "0 auto clamp(26px, 6vw, 46px) auto",
-          justifyContent: "center",
-          width: "100%",
-        }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            margin: "0 auto clamp(26px, 6vw, 46px) auto",
+            justifyContent: "center",
+            width: "100%",
+          }}
+        >
           {/* Flecha izquierda */}
           <button
             onClick={handleLeft}
@@ -154,16 +178,20 @@ export default function StepCustomize({
               cursor: "pointer",
             }}
           >
-            <span style={{ fontSize: "clamp(22px, 5vw, 33px)", color: "#fff" }}>{"<"}</span>
+            <span style={{ fontSize: "clamp(22px, 5vw, 33px)", color: "#fff" }}>
+              {"<"}
+            </span>
           </button>
 
           {/* Miniaturas de estilos */}
-          <div style={{
-            display: "flex",
-            gap: "clamp(5px, 2vw, 14px)",
-            overflowX: "auto",
-            maxWidth: "68vw"
-          }}>
+          <div
+            style={{
+              display: "flex",
+              gap: "clamp(5px, 2vw, 14px)",
+              overflowX: "auto",
+              maxWidth: "68vw",
+            }}
+          >
             {avatarStyles.map((item, idx) => (
               <img
                 key={item.name}
@@ -207,12 +235,14 @@ export default function StepCustomize({
               cursor: "pointer",
             }}
           >
-            <span style={{ fontSize: "clamp(22px, 5vw, 33px)", color: "#fff" }}>{">"}</span>
+            <span style={{ fontSize: "clamp(22px, 5vw, 33px)", color: "#fff" }}>
+              {">"}
+            </span>
           </button>
         </div>
       </div>
 
-      {/* Botón guardar siempre visible abajo */}
+      {/* Botón Simular siempre visible abajo */}
       <div
         style={{
           width: "100%",
@@ -226,10 +256,7 @@ export default function StepCustomize({
         }}
       >
         <button
-          onClick={() => {
-            setCustomStyle(avatarStyles[current].name);
-            next();
-          }}
+          onClick={handleSimularClick}
           style={{
             width: "clamp(120px, 32vw, 210px)",
             fontSize: "clamp(1.1rem, 4vw, 1.65rem)",
@@ -245,8 +272,15 @@ export default function StepCustomize({
             cursor: "pointer",
           }}
         >
-          Guardar
+          Simular
         </button>
+        <input
+          type="file"
+          accept="image/*"
+          ref={fileInputRef}
+          style={{ display: "none" }}
+          onChange={handlePhotoChange}
+        />
       </div>
     </div>
   );

@@ -4,8 +4,13 @@ const logo = "/LOGO_MOTO_IA.png"; // Logo grande arriba
 const logosFooter = "/LOGOS.png"; // Logos FIFA/Motorola, abajo
 const avatarFinal = "/CARA_HOMBRE_3.png"; // Cambia por el avatar final generado
 
-export default function StepFinish({ avatar }: { avatar: string }) {
-  console.log(avatar)
+interface StepFinishProps {
+  avatar: string;
+  photo: string | null;
+  onRestart: () => void;
+}
+
+export default function StepFinish({ photo, onRestart }: StepFinishProps) {
   return (
     <div
       style={{
@@ -44,7 +49,7 @@ export default function StepFinish({ avatar }: { avatar: string }) {
 
       {/* Avatar centrado */}
       <img
-        src={avatar || avatarFinal}
+        src={photo || avatarFinal}
         alt="Avatar final"
         style={{
           width: 280,
@@ -90,6 +95,27 @@ export default function StepFinish({ avatar }: { avatar: string }) {
           actividad.
         </Text>
       </div>
+
+      <button
+        onClick={onRestart}
+        style={{
+          width: "clamp(170px, 34vw, 320px)",
+          fontSize: "clamp(1.25rem, 4vw, 1.7rem)",
+          fontWeight: 700,
+          borderRadius: 14,
+          background: "linear-gradient(90deg,#181822 70%,#8ad5f7 140%)",
+          color: "#fff",
+          padding: "17px 0",
+          margin: "12px auto 0 auto",
+          border: "none",
+          boxShadow: "0 4px 18px #686e8955",
+          letterSpacing: "0.01em",
+          cursor: "pointer",
+          display: "block",
+        }}
+      >
+        Reiniciar
+      </button>
 
       {/* Logos de patrocinadores en el footer */}
       <div
