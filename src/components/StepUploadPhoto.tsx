@@ -104,7 +104,6 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
               animate={{ opacity: 1 }}
               transition={{ duration: 1, repeat: Infinity, repeatType: "mirror" }}
               style={{
-                marginBottom: 20,
                 color: "#ff784f",
                 fontWeight: "700",
                 fontSize: "1.2rem",
@@ -122,9 +121,8 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
             alt="rostros"
             draggable={false}
             style={{
-              width: "min(220px, 80vw)",
+              width: "min(200px, 80vw)",
               height: "auto",
-              marginBottom: 10,
               maxWidth: "100%",
               opacity: waitingImage ? 0.7 : 1,
               transition: "opacity 0.4s ease",
@@ -146,7 +144,7 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
               alignItems: "center",
               gap: 12,
               width: "95%",
-              marginBottom: 12,
+              marginBottom: 5,
               minWidth: 0,
               overflow: "hidden",
             }}
@@ -181,7 +179,7 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
               alignItems: "center",
               gap: 12,
               width: "95%",
-              marginBottom: 24,
+              marginBottom: 5,
               minWidth: 0,
               overflow: "hidden",
             }}
@@ -216,7 +214,7 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
               alignItems: "center",
               gap: 12,
               width: "95%",
-              marginBottom: 24,
+              marginBottom: 5,
               minWidth: 0,
               overflow: "hidden",
             }}
