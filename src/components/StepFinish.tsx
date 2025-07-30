@@ -35,7 +35,7 @@ async function uploadToImgbb(base64: string): Promise<string | null> {
 
 // Llama al backend para convertir una Drive URL en imgbb
 async function uploadDriveUrlToImgbb(driveUrl: string): Promise<string | null> {
-  const response = await fetch("http://localhost:3000/upload-drive-to-imgbb", {
+  const response = await fetch("https://moto-ai-server-wd9gh.ondigitalocean.app/upload-drive-to-imgbb", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
