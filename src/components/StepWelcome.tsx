@@ -3,7 +3,7 @@ import { Button } from "@mantine/core";
 const fondo = "/FONDO-HOME.png";
 const centralImage = "/TEXTOS_HOME.png";
 
-export default function StepWelcome({ next }) {
+export default function StepWelcome({ next }: { next: () => void }) {
   return (
     <div className="step-welcome-bg">
       <div className="step-welcome-center">
