@@ -1,7 +1,7 @@
 import { Text } from "@mantine/core";
-import { useRef } from "react";
-import { useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { io } from "socket.io-client";
+import { motion } from "framer-motion";
 
 interface Props {
   next: () => void;
@@ -22,27 +22,20 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
     const socket = io(SOCKET_URL);
 
     socket.on("nueva-imagen", (data) => {
-      // Aquí actualizas el estado y pasas al siguiente paso
       setPhoto(data.url);
       next();
     });
 
-    // Cleanup
     return () => {
       socket.disconnect();
     };
   }, [setPhoto, next]);
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] ?? null;
-    if (file) {
-      setPhoto(URL.createObjectURL(file));
-      next();
-    }
-  };
-
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1 }}
       style={{
         position: "fixed",
         inset: 0,
@@ -61,15 +54,22 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
         padding: 0,
       }}
     >
-      {/* Borde degradado tipo neón */}
-      <div
+      {/* Caja con borde neón y pulso */}
+      <motion.div
+        initial={{ boxShadow: "0 0 20px 6px #ff4fc680" }}
+        animate={{
+          boxShadow: [
+            "0 0 20px 6px #ff4fc680",
+            "0 0 42px 14px #ff4fc680",
+            "0 0 20px 6px #ff4fc680",
+          ],
+        }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         style={{
           padding: "max(0vw, 6px)",
           borderRadius: 36,
           background:
             "linear-gradient(120deg, #ff5b9f 0%, #ffd36e 40%, #4fc6ff 80%, #a66bff 100%)",
-          boxShadow:
-            "0 0 42px 14px #ff4fc680, 0 14px 42px 0 rgba(46,16,101,0.13)",
           maxWidth: 440,
           width: "95vw",
           maxHeight: "94vh",
@@ -79,6 +79,7 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
           justifyContent: "center",
         }}
       >
+        {/* Contenido blanco */}
         <div
           style={{
             background: "#fff",
@@ -93,21 +94,26 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
             overflowY: "auto",
           }}
         >
-          {/* Imagen de rostros */}
-          <img
+          {/* Imagenes con float animado */}
+          <motion.img
             src={caras}
             alt="rostros"
+            draggable={false}
             style={{
               width: "min(220px, 80vw)",
               height: "auto",
               marginBottom: 10,
               maxWidth: "100%",
             }}
-            draggable={false}
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
           />
 
-          {/* Card con Moto IA / Image Studio */}
-          <div
+          {/* Card Moto IA */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
             style={{
               background: "#f4f1ee",
               borderRadius: 16,
@@ -121,28 +127,28 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
               overflow: "hidden",
             }}
           >
-            <img
+            <motion.img
               src={cel}
               alt="Moto IA"
-              style={{
-                width: 80,
-                height: 80,
-                minWidth: 24,
-              }}
               draggable={false}
+              style={{ width: 80, height: 80, minWidth: 24 }}
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
             />
             <Text
               size="md"
               fw={600}
               style={{ fontSize: "clamp(1.23rem, 2.6vw, 1.23rem)" }}
             >
-              Abre Moto IA en el celular e ingresa a{" "}
-              <strong>"Image Studio"</strong>
+              Abre Moto IA en el celular e ingresa a <strong>"Image Studio"</strong>
             </Text>
-          </div>
+          </motion.div>
 
-          {/* Card con Avatar */}
-          <div
+          {/* Card Avatar 1 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
             style={{
               background: "#f4f1ee",
               borderRadius: 16,
@@ -156,15 +162,13 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
               overflow: "hidden",
             }}
           >
-            <img
+            <motion.img
               src={avatar}
               alt="crear avatar"
-              style={{
-                width: 80,
-                height: 80,
-                minWidth: 24,
-              }}
               draggable={false}
+              style={{ width: 80, height: 80, minWidth: 24 }}
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
             />
             <Text
               size="md"
@@ -173,9 +177,13 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
             >
               Entra a <strong>“Crear avatar”</strong>
             </Text>
-          </div>
+          </motion.div>
 
-          <div
+          {/* Card Avatar 2 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
             style={{
               background: "#f4f1ee",
               borderRadius: 16,
@@ -189,29 +197,28 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
               overflow: "hidden",
             }}
           >
-            <img
+            <motion.img
               src={avatar}
               alt="crear avatar"
-              style={{
-                width: 80,
-                height: 80,
-                minWidth: 24,
-              }}
               draggable={false}
+              style={{ width: 80, height: 80, minWidth: 24 }}
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
             />
             <Text
               size="md"
               fw={600}
               style={{ fontSize: "clamp(1.23rem, 2.6vw, 1.23rem)" }}
             >
-              Tomate
-              <strong> una selfie</strong>
+              Tomate <strong> una selfie</strong>
             </Text>
-          </div>
+          </motion.div>
 
-          {/* Botón para tomar selfie */}
-          <button
+          {/* Botón animado */}
+          <motion.button
             onClick={() => next()}
+            whileHover={{ scale: 1.05, boxShadow: "0 10px 25px #ff5b9fcc" }}
+            whileTap={{ scale: 0.95 }}
             style={{
               marginTop: 6,
               width: "100%",
@@ -229,17 +236,24 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
             }}
           >
             ¡Vamos!
-          </button>
+          </motion.button>
+
           {/* Input oculto */}
           <input
             type="file"
             ref={fileInputRef}
             accept="image/*"
             style={{ display: "none" }}
-            onChange={handleFile}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                setPhoto(URL.createObjectURL(file));
+                next();
+              }
+            }}
           />
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

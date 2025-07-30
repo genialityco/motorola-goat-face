@@ -1,4 +1,5 @@
 import { Button, Title } from "@mantine/core";
+import { motion } from "framer-motion";
 
 const mujer = "/MARCO_MUJER.png";
 const logo = "/LOGO_MOTO_IA.png";
@@ -7,7 +8,7 @@ export default function StepLoading({ next }: { next: () => void }) {
   return (
     <div className="step-loading-bg" onClick={next}>
       <div className="step-loading-center">
-        {/* Imagen principal */}
+        {/* Imagen principal con animación float/zoom */}
         <img
           src={mujer}
           alt="rostro mujer"
@@ -15,22 +16,39 @@ export default function StepLoading({ next }: { next: () => void }) {
           draggable={false}
         />
 
-        {/* Logo */}
-        <img
+        {/* Logo animado con framer-motion */}
+        <motion.img
           src={logo}
           alt="Logo moto ai"
           className="logo-moto"
           draggable={false}
+          initial={{ opacity: 0, y: -20 }}
+          animate={{
+            opacity: 1,
+            y: [0, 5, 0],
+          }}
+          transition={{
+            duration: 3,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 0.5,
+          }}
         />
 
-        {/* Título */}
-        <Title fw={400} ta="center" c="white" className="step-loading-title">
-          ¿Quieres ponerle
-          <br />
-          cara a tu GOAT?
-        </Title>
+        {/* Título animado con framer-motion */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
+        >
+          <Title fw={400} ta="center" c="white" className="step-loading-title">
+            ¿Quieres ponerle
+            <br />
+            cara a tu GOAT?
+          </Title>
+        </motion.div>
 
-        {/* Texto con degradado */}
+        {/* Texto con efecto shimmer */}
         <div className="step-loading-gradient-text">
           <span className="step-loading-gradient-span">
             Hazlo ahora con el poder
@@ -39,7 +57,7 @@ export default function StepLoading({ next }: { next: () => void }) {
           </span>
         </div>
 
-        {/* Botón */}
+        {/* Botón con animación pulse y hover */}
         <Button className="step-loading-btn" size="compact-xl" radius="md">
           Iniciar
         </Button>
@@ -72,6 +90,11 @@ export default function StepLoading({ next }: { next: () => void }) {
           align-items: center;
           justify-content: center;
         }
+        /* Imagen con animación float + zoom */
+        @keyframes floatZoom {
+          0%, 100% { transform: translate(-50%, -50%) scale(1); }
+          50% { transform: translate(calc(-50% + 8px), calc(-50% + 6px)) scale(1.05); }
+        }
         .rostro-mujer {
           width: 70vw;
           height: 80vh;
@@ -84,17 +107,23 @@ export default function StepLoading({ next }: { next: () => void }) {
           z-index: 1;
           pointer-events: none;
           user-select: none;
+          animation: floatZoom 8s ease-in-out infinite;
         }
+        /* Logo sin animación CSS (framer-motion lo anima) */
         .logo-moto {
           position: absolute;
           top: max(5vw, 32px);
-          left: 50%;
           transform: translateX(-50%);
           width: min(220px, 38vw);
           height: auto;
           z-index: 10;
           pointer-events: none;
           user-select: none;
+        }
+        /* Título con sombra pulsante */
+        @keyframes glowPulse {
+          0%, 100% { text-shadow: 0 2px 10px #000a; }
+          50% { text-shadow: 0 2px 20px #ff6b37cc; }
         }
         .step-loading-title {
           position: absolute;
@@ -107,7 +136,18 @@ export default function StepLoading({ next }: { next: () => void }) {
           z-index: 10;
           width: 90vw;
           max-width: 390px;
-          text-shadow: 0 2px 10px #000a;
+          animation: glowPulse 3.5s ease-in-out infinite;
+          user-select: none;
+          color: white;
+        }
+        /* Texto con efecto shimmer */
+        @keyframes shimmer {
+          0% {
+            background-position: -200% 0;
+          }
+          100% {
+            background-position: 200% 0;
+          }
         }
         .step-loading-gradient-text {
           position: absolute;
@@ -127,12 +167,23 @@ export default function StepLoading({ next }: { next: () => void }) {
           letter-spacing: 0.01em;
         }
         .step-loading-gradient-span {
-          background: linear-gradient(90deg, #ff6b37, #4fd1ff 90%);
+          background: linear-gradient(90deg, #ff6b37 20%, #4fd1ff 40%, #ff6b37 60%);
+          background-size: 200% 100%;
+          animation: shimmer 4s linear infinite;
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           font-weight: 700;
           filter: drop-shadow(0 2px 6px #ffab5c33);
           font-size: clamp(1.05rem, 4.3vw, 1.34rem);
+        }
+        /* Botón con animación pulse en sombra y hover */
+        @keyframes pulseShadow {
+          0%, 100% {
+            box-shadow: 0 3px 16px 0 #ff864033;
+          }
+          50% {
+            box-shadow: 0 6px 24px 0 #ffb37666;
+          }
         }
         .step-loading-btn {
           z-index: 12;
@@ -149,6 +200,13 @@ export default function StepLoading({ next }: { next: () => void }) {
           box-shadow: 0 3px 16px 0 #ff864033;
           min-width: 120px;
           max-width: 320px;
+          animation: pulseShadow 3s ease-in-out infinite;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+          cursor: pointer;
+        }
+        .step-loading-btn:hover {
+          transform: scale(1.05);
+          box-shadow: 0 8px 32px 0 #ffb376cc;
         }
 
         /* MOBILE */

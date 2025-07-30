@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Title, Text, Loader } from "@mantine/core";
+import { Text, Loader } from "@mantine/core";
+import { motion } from "framer-motion";
 
 const logo = "/LOGO_MOTO_IA.png";
 const logosFooter = "/LOGOS.png";
@@ -13,7 +14,6 @@ interface StepFinishProps {
 
 const IMGBB_API_KEY = "f62a94925b92030ce2d0010f2a63544c";
 
-// Subida directa de base64
 async function uploadToImgbb(base64: string): Promise<string | null> {
   const form = new FormData();
   form.append("image", base64.replace(/^data:image\/\w+;base64,/, ""));
@@ -33,15 +33,17 @@ async function uploadToImgbb(base64: string): Promise<string | null> {
   }
 }
 
-// Llama al backend para convertir una Drive URL en imgbb
 async function uploadDriveUrlToImgbb(driveUrl: string): Promise<string | null> {
-  const response = await fetch("https://moto-ai-server-wd9gh.ondigitalocean.app/upload-drive-to-imgbb", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ driveUrl }),
-  });
+  const response = await fetch(
+    "https://moto-ai-server-wd9gh.ondigitalocean.app/upload-drive-to-imgbb",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ driveUrl }),
+    }
+  );
   const json = await response.json();
   if (!json.url) throw new Error(json.error || "No se pudo subir la imagen");
   return json.url;
@@ -101,7 +103,10 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
       : null;
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8 }}
       style={{
         position: "fixed",
         inset: 0,
@@ -116,18 +121,24 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "flex-start",
-        overflow: "auto",
+        justifyContent: "space-between",
+        paddingTop: "env(safe-area-inset-top, 20px)",
+        paddingBottom: "env(safe-area-inset-bottom, 20px)",
+        overflow: "hidden", // evita scroll
       }}
     >
       {/* Logo */}
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1 }}
         style={{
           width: "100%",
           display: "flex",
           justifyContent: "center",
           marginTop: "min(7vw, 38px)",
           marginBottom: "min(4vw, 18px)",
+          flexShrink: 0,
         }}
       >
         <img
@@ -135,7 +146,7 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
           alt="Logo moto ai"
           style={{
             width: "min(65vw, 250px)",
-            maxWidth: 250,
+            maxWidth: 230,
             height: "auto",
             userSelect: "none",
             pointerEvents: "none",
@@ -143,41 +154,68 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
           }}
           draggable={false}
         />
-      </div>
+      </motion.div>
 
-      {/* Avatar y QR */}
-      <div
+      {/* Avatar + QR */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1, delay: 0.3 }}
         style={{
           width: "100%",
+          maxWidth: 320,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           gap: "min(4vw, 20px)",
           marginBottom: "min(6vw, 30px)",
+          flexShrink: 0,
         }}
       >
-        <img
+        <motion.img
           src={imageToShow}
           alt="Avatar final"
           style={{
-            width: "min(70vw, 320px)",
+            width: "100%",
             maxWidth: 180,
-            height: "auto",
-            aspectRatio: "1/1",
+            aspectRatio: "1 / 1",
             borderRadius: 24,
             objectFit: "cover",
-            display: "block",
-            margin: "0 auto",
             background: "linear-gradient(180deg, #ff6634 0%, #1ba4fd 100%)",
             padding: "min(6px, 1vw)",
             boxShadow: `
-              0 -12px 32px 0 #ff663499,   
-              0  14px 38px 0 #1ba4fd99,    
-              0  0px 40px 0 #14204660,   
-              0  0px 0px 2px #fff
+              0 -12px 32px 0 #ff663499,
+              0 14px 38px 0 #1ba4fd99,
+              0 0px 40px 0 #14204660,
+              0 0px 0px 2px #fff
             `,
+            userSelect: "none",
+            pointerEvents: "none",
+            margin: "0 auto",
           }}
           draggable={false}
+          animate={{
+            scale: [1, 1.03, 1],
+            boxShadow: [
+              `0 -12px 32px 0 #ff663499,
+               0 14px 38px 0 #1ba4fd99,
+               0 0px 40px 0 #14204660,
+               0 0px 12px 4px #ff784fbb`,
+              `0 -12px 44px 0 #ff7a5aaa,
+               0 14px 44px 0 #45c0f9aa,
+               0 0px 55px 0 #142046aa,
+               0 0px 12px 8px #ff9a78cc`,
+              `0 -12px 32px 0 #ff663499,
+               0 14px 38px 0 #1ba4fd99,
+               0 0px 40px 0 #14204660,
+               0 0px 0px 2px #fff`,
+            ],
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
         />
 
         <div
@@ -217,21 +255,25 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
           )}
           {!uploading && qrUrl && (
             <>
-              <img
+              <motion.img
                 src={qrUrl}
                 alt="Código QR para descargar tu imagen"
                 style={{
-                  width: "min(36vw, 148px)",
-                  height: "min(36vw, 148px)",
+                  width: "100%",
                   maxWidth: 160,
-                  maxHeight: 160,
+                  aspectRatio: "1 / 1",
                   background: "#fff",
                   borderRadius: 8,
                   boxShadow: "0 0 10px #2AB8FF44",
                   marginBottom: 2,
                   marginTop: 8,
+                  userSelect: "none",
+                  pointerEvents: "none",
                 }}
                 draggable={false}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8 }}
               />
               <Text
                 size="sm"
@@ -244,6 +286,7 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
                   marginTop: 2,
                   marginBottom: 4,
                   maxWidth: 120,
+                  userSelect: "none",
                 }}
               >
                 Escanea para descargar tu imagen
@@ -251,29 +294,22 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
             </>
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* Mensaje central */}
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.9, delay: 0.4 }}
         style={{
           width: "100%",
           textAlign: "center",
           marginBottom: "min(7vw, 28px)",
           paddingInline: 12,
+          flexShrink: 0,
+          userSelect: "none",
         }}
       >
-        <Title
-          order={1}
-          style={{
-            color: "#fff",
-            fontWeight: 700,
-            fontSize: "clamp(2rem, 6vw, 42px)",
-            marginBottom: 14,
-            textShadow: "0 3px 12px #19193966",
-          }}
-        >
-          ¡Listo!
-        </Title>
         <Text
           style={{
             color: "#fff",
@@ -291,38 +327,57 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
           <br />
           actividad.
         </Text>
-      </div>
+      </motion.div>
 
-      <button
+      {/* Botón Reiniciar */}
+      <motion.button
         onClick={onRestart}
+        whileHover={{ scale: 1.05, boxShadow: "0 6px 20px #8ad5f7cc" }}
+        whileTap={{ scale: 0.95 }}
         style={{
-          width: "min(85vw, 320px)",
-          fontSize: "clamp(1.1rem, 4vw, 1.55rem)",
-          fontWeight: 700,
+          position: "fixed",
+          top: "0",
+          left: "0",
+          width: 48, // tamaño del botón fijo (ajusta según tu imagen)
+          height: 48,
+          padding: 0,
           borderRadius: 14,
-          background: "linear-gradient(90deg,#181822 70%,#8ad5f7 140%)",
-          color: "#fff",
-          padding: "16px 0",
-          margin: "0 auto min(5vw, 18px) auto",
           border: "none",
-          boxShadow: "0 4px 18px #686e8955",
-          letterSpacing: "0.01em",
           cursor: "pointer",
-          display: "block",
-          position: "relative",
+          background:"none",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
         }}
       >
-        Reiniciar
-      </button>
+        <img
+          src="/reiniciar.png" // asegúrate que esta ruta sea correcta
+          alt="Reiniciar"
+          style={{
+            width: 28, // tamaño de la imagen, ajusta si quieres más grande o más pequeña
+            height: 28,
+            objectFit: "contain",
+            pointerEvents: "none", // para que no interfiera con el click del botón
+            userSelect: "none",
+          }}
+          draggable={false}
+        />
+      </motion.button>
 
       {/* Logos patrocinadores footer */}
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, delay: 0.6 }}
         style={{
           width: "100vw",
           display: "flex",
           justifyContent: "center",
           alignItems: "flex-end",
           marginBottom: "min(4vw, 24px)",
+          flexShrink: 0,
+          userSelect: "none",
         }}
       >
         <img
@@ -333,13 +388,12 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
             maxWidth: 350,
             height: "auto",
             opacity: 0.98,
-            userSelect: "none",
             pointerEvents: "none",
             display: "block",
           }}
           draggable={false}
         />
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
