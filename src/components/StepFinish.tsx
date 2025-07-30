@@ -124,7 +124,8 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
         justifyContent: "space-between",
         paddingTop: "env(safe-area-inset-top, 20px)",
         paddingBottom: "env(safe-area-inset-bottom, 20px)",
-        overflow: "hidden", // evita scroll
+        overflow: "auto", // permitir scroll solo si es necesario
+        boxSizing: "border-box",
       }}
     >
       {/* Logo */}
@@ -169,7 +170,9 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
           alignItems: "center",
           gap: "min(4vw, 20px)",
           marginBottom: "min(6vw, 30px)",
-          flexShrink: 0,
+          flexShrink: 1, // permite reducción en pantallas pequeñas
+          boxSizing: "border-box",
+          paddingInline: 12,
         }}
       >
         <motion.img
@@ -178,6 +181,7 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
           style={{
             width: "100%",
             maxWidth: 180,
+            maxHeight: 180,
             aspectRatio: "1 / 1",
             borderRadius: 24,
             objectFit: "cover",
@@ -261,6 +265,7 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
                 style={{
                   width: "100%",
                   maxWidth: 160,
+                  maxHeight: 160,
                   aspectRatio: "1 / 1",
                   background: "#fff",
                   borderRadius: 8,
@@ -338,13 +343,13 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
           position: "fixed",
           top: "0",
           left: "0",
-          width: 48, // tamaño del botón fijo (ajusta según tu imagen)
+          width: 48,
           height: 48,
           padding: 0,
           borderRadius: 14,
           border: "none",
           cursor: "pointer",
-          background:"none",
+          background: "none",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -352,13 +357,13 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
         }}
       >
         <img
-          src="/reiniciar.png" // asegúrate que esta ruta sea correcta
+          src="/reiniciar.png"
           alt="Reiniciar"
           style={{
-            width: 28, // tamaño de la imagen, ajusta si quieres más grande o más pequeña
+            width: 28,
             height: 28,
             objectFit: "contain",
-            pointerEvents: "none", // para que no interfiera con el click del botón
+            pointerEvents: "none",
             userSelect: "none",
           }}
           draggable={false}
@@ -371,7 +376,9 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, delay: 0.6 }}
         style={{
-          width: "100vw",
+          width: "100%",
+          maxWidth: 350,
+          paddingInline: 12,
           display: "flex",
           justifyContent: "center",
           alignItems: "flex-end",
@@ -384,7 +391,7 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
           src={logosFooter}
           alt="Patrocinadores"
           style={{
-            width: "min(90vw, 350px)",
+            width: "100%",
             maxWidth: 350,
             height: "auto",
             opacity: 0.98,

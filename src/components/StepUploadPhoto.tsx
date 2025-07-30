@@ -1,5 +1,5 @@
 import { Text } from "@mantine/core";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { motion } from "framer-motion";
 
@@ -12,18 +12,20 @@ interface Props {
 const caras = "/CARAS.png";
 const cel = "/CEL.png";
 const avatar = "/CARA_HOMBRE.png";
-const selfie ="/selfie.png";
+const selfie = "/selfie.png";
 
 const SOCKET_URL = "https://moto-ai-server-wd9gh.ondigitalocean.app";
 
 export default function StepUploadPhoto({ next, setPhoto }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [waitingImage, setWaitingImage] = useState(true);
 
   useEffect(() => {
     const socket = io(SOCKET_URL);
 
     socket.on("nueva-imagen", (data) => {
       setPhoto(data.url);
+      setWaitingImage(false);
       next();
     });
 
@@ -95,7 +97,26 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
             overflowY: "auto",
           }}
         >
-          {/* Imagenes con float animado */}
+          {/* Aquí mostramos indicación solo si esperamos la imagen */}
+          {waitingImage && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1, repeat: Infinity, repeatType: "mirror" }}
+              style={{
+                marginBottom: 20,
+                color: "#ff784f",
+                fontWeight: "700",
+                fontSize: "1.2rem",
+                userSelect: "none",
+                textAlign: "center",
+              }}
+            >
+              Esperando que se genere el avatar en el celular Motorola...
+            </motion.div>
+          )}
+
+          {/* Imágenes con float animado */}
           <motion.img
             src={caras}
             alt="rostros"
@@ -105,6 +126,8 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
               height: "auto",
               marginBottom: 10,
               maxWidth: "100%",
+              opacity: waitingImage ? 0.7 : 1,
+              transition: "opacity 0.4s ease",
             }}
             animate={{ y: [0, -8, 0] }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
