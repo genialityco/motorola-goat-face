@@ -58,7 +58,7 @@ export default function StepLoading({ next }: { next: () => void }) {
         </div>
 
         {/* Botón con animación pulse y hover */}
-        <Button className="step-loading-btn" size="compact-xl" radius="md">
+        <Button className="step-loading-btn" radius="md">
           Iniciar
         </Button>
       </div>
@@ -89,6 +89,8 @@ export default function StepLoading({ next }: { next: () => void }) {
           flex-direction: column;
           align-items: center;
           justify-content: center;
+          padding-left: 12px;  /* margen horizontal para no tocar bordes */
+          padding-right: 12px;
         }
         /* Imagen con animación float + zoom */
         @keyframes floatZoom {
@@ -193,8 +195,8 @@ export default function StepLoading({ next }: { next: () => void }) {
           transform: translateX(-50%);
           background: linear-gradient(90deg, #ff784f, #ffb376 85%);
           font-size: clamp(1.09rem, 4vw, 1.4rem);
-          padding: 0.92em 3.2em;
           font-weight: 800;
+          padding-inline: 5em;
           letter-spacing: 0.2em;
           border: none;
           box-shadow: 0 3px 16px 0 #ff864033;

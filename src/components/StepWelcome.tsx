@@ -4,10 +4,8 @@ import { useMemo } from "react";
 const fondo = "/FONDO-HOME.png";
 const centralImage = "/TEXTOS_HOME.png";
 
-// Cantidad de estelas simultáneas
 const TRAILS = 5;
 
-// Función para generar coordenadas polares aleatorias (alrededor de la imagen)
 function getRandomPolarCoord(radiusRange = [140, 180]) {
   const angle = Math.random() * 2 * Math.PI;
   const radius =
@@ -23,7 +21,6 @@ function getRandomPolarCoord(radiusRange = [140, 180]) {
 export default function StepWelcome({ next }: { next: () => void }) {
   const controls = useAnimation();
 
-  // Para cada render, generamos una seed para que la animación y ubicación sean independientes
   const trails = useMemo(
     () =>
       Array.from({ length: TRAILS }).map(() => ({
@@ -33,7 +30,6 @@ export default function StepWelcome({ next }: { next: () => void }) {
     []
   );
 
-  // Animación del botón
   const handleButtonClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     await controls.start({
@@ -57,10 +53,8 @@ export default function StepWelcome({ next }: { next: () => void }) {
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
       <div className="step-welcome-center">
-        {/* Glow animado */}
         <div className="step-welcome-glow" aria-hidden />
 
-        {/* --- Trail Effect --- */}
         <div className="step-welcome-trail-area">
           {trails.map((trail, i) => (
             <motion.span
@@ -102,7 +96,6 @@ export default function StepWelcome({ next }: { next: () => void }) {
                 position: "absolute",
                 zIndex: 4,
                 pointerEvents: "none",
-                // Puedes cambiar color/gradient aquí:
                 background:
                   "linear-gradient(92deg, #fff8 25%, #ffb376 70%, #fff0 100%)",
                 filter: "blur(2px) brightness(1.16)",
@@ -116,7 +109,6 @@ export default function StepWelcome({ next }: { next: () => void }) {
           ))}
         </div>
 
-        {/* Imagen central animada */}
         <motion.img
           src={centralImage}
           alt="GOAT FACE moto ai"
@@ -133,14 +125,17 @@ export default function StepWelcome({ next }: { next: () => void }) {
           }}
         />
 
-        {/* Botón animado */}
         <motion.div
           animate={controls}
           whileHover={{
             scale: 1.045,
             boxShadow: "0 8px 24px 0 #ffb37644, 0 2px 9px 0 rgba(0,0,0,0.14)",
           }}
-          style={{ display: "inline-block" }}
+          style={{
+            display: "inline-block",
+            width: "90vw",
+            maxWidth: 320,
+          }}
         >
           <motion.button
             onClick={handleButtonClick}
@@ -154,17 +149,20 @@ export default function StepWelcome({ next }: { next: () => void }) {
               letterSpacing: 1,
               borderRadius: 8,
               border: "none",
-              padding: "18px 60px",
+              padding: "18px 3.5vw",
               cursor: "pointer",
               outline: "none",
               boxShadow: "0 4px 18px 0 rgba(0,0,0,0.09)",
               color: "#222",
               background: "white",
-              position: "relative",
+              position: "fixed",
+              bottom: "30px",
               overflow: "hidden",
               fontSize: 21,
-              width: 300,
-              maxWidth: "85vw",
+              width: "100%",
+              maxWidth: 320,
+              minWidth: 180,
+              boxSizing: "border-box",
             }}
             animate={{
               backgroundPosition: ["200% 0", "0% 0"],
@@ -213,6 +211,8 @@ export default function StepWelcome({ next }: { next: () => void }) {
           justify-content: center;
           position: relative;
           gap: 36px;
+          padding: 0 12px; /* agregar para evitar tocar bordes */
+          box-sizing: border-box;
         }
         .step-welcome-trail-area {
           position: absolute;
@@ -225,7 +225,6 @@ export default function StepWelcome({ next }: { next: () => void }) {
         }
         .step-welcome-trail {
           opacity: 0;
-          /* transition: opacity 0.3s; // Animado por framer */
         }
         .step-welcome-glow {
           position: absolute;
@@ -251,7 +250,7 @@ export default function StepWelcome({ next }: { next: () => void }) {
         .step-welcome-image {
           width: 340px;
           max-width: 92vw;
-          aspect-ratio: 9/16;
+          aspect-ratio: 9 / 16;
           object-fit: cover;
           border-radius: 22px;
           pointer-events: none;
@@ -263,8 +262,6 @@ export default function StepWelcome({ next }: { next: () => void }) {
           background: none;
         }
         .step-welcome-btn {
-          width: 300px;
-          max-width: 85vw;
           font-size: 21px;
           margin-top: 10px;
           z-index: 3;
@@ -274,7 +271,6 @@ export default function StepWelcome({ next }: { next: () => void }) {
         @media (max-width: 1024px) {
           .step-welcome-image { width: 260px; }
           .step-welcome-glow { width: 340px; height: 420px; }
-          .step-welcome-btn { width: 220px; font-size: 18px; }
         }
         /* Celulares grandes */
         @media (max-width: 600px) {
@@ -285,25 +281,17 @@ export default function StepWelcome({ next }: { next: () => void }) {
             margin-top: 4vw;
             margin-bottom: 2vw;
           }
-          .step-welcome-glow {
-            width: 93vw;
-            height: 125vw;
-            filter: blur(22px) brightness(1.13);
-            left: 49.6%;
-          }
           .step-welcome-btn {
-            font-size: 16px;
-            width: 87vw;
-            max-width: 97vw;
-            padding: 15px 0;
+            font-size: 16px !important;
+            padding: 15px 0 !important;
           }
         }
         /* Celulares XS */
         @media (max-width: 400px) {
           .step-welcome-btn {
-            font-size: 14px;
+            font-size: 14px !important;
             margin-top: 6vw;
-            padding: 11px 0;
+            padding: 11px 0 !important;
           }
           .step-welcome-image { border-radius: 7px; }
         }
