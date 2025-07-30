@@ -17,7 +17,6 @@ export default function StepWelcome({ next }: { next: () => void }) {
         <Button
           size="xl"
           radius="md"
-          onClick={next}
           className="step-welcome-btn"
           style={{
             fontWeight: 800,
