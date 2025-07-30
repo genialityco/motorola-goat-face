@@ -13,7 +13,7 @@ const caras = "/CARAS.png";
 const cel = "/CEL.png";
 const avatar = "/CARA_HOMBRE.png";
 
-const SOCKET_URL = "http://localhost:3000";
+const SOCKET_URL = "https://moto-ai-server-wd9gh.ondigitalocean.app";
 
 export default function StepUploadPhoto({ next, setPhoto }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
