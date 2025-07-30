@@ -3,48 +3,14 @@ import { Button } from "@mantine/core";
 const fondo = "/FONDO-HOME.png";
 const centralImage = "/TEXTOS_HOME.png";
 
-export default function StepWelcome({ next }: { next: () => void }) {
+export default function StepWelcome({ next }) {
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        width: "100vw",
-        height: "100vh",
-        backgroundImage: `url(${fondo})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexDirection: "column",
-        overflow: "hidden",
-        padding: 0,
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
+    <div className="step-welcome-bg">
+      <div className="step-welcome-center">
         <img
           src={centralImage}
           alt="GOAT FACE moto ai"
-          style={{
-            width: "min(90vw, 600px)",
-            maxWidth: 600,
-            aspectRatio: "9/16",
-            objectFit: "cover",
-            borderRadius: "24px",
-            pointerEvents: "none",
-            userSelect: "none",
-            display: "block",
-            transition: "all 0.2s"
-          }}
+          className="step-welcome-image"
           draggable={false}
         />
 
@@ -52,17 +18,16 @@ export default function StepWelcome({ next }: { next: () => void }) {
           size="xl"
           radius="md"
           onClick={next}
+          className="step-welcome-btn"
           style={{
-            width: "min(85vw, 320px)",
             fontWeight: 800,
-            fontSize: 22,
             letterSpacing: 1,
             background: "#fff",
             color: "#222",
             boxShadow: "0 4px 18px 0 rgba(0,0,0,0.09)",
             border: "none",
-            transition: "background 0.2s, box-shadow 0.2s, transform 0.1s",
             cursor: "pointer",
+            transition: "background 0.2s, box-shadow 0.2s, transform 0.1s",
           }}
           onMouseDown={e => (e.currentTarget.style.transform = "scale(0.96)")}
           onMouseUp={e => (e.currentTarget.style.transform = "scale(1)")}
@@ -72,25 +37,63 @@ export default function StepWelcome({ next }: { next: () => void }) {
         </Button>
       </div>
 
-      <style>
-        {`
-          @media (max-width: 600px) {
-            img[alt="GOAT FACE moto ai"] {
-              width: 99vw !important;
-              max-width: 99vw !important;
-              aspect-ratio: 9/16 !important;
-              border-radius: 8px !important;
-              margin-top: 4vw !important;
-              margin-bottom: 2vw !important;
-            }
-            button {
-              font-size: 16px !important;
-              width: 60vw !important;
-              max-width: 97vw !important;
-            }
+      <style>{`
+        .step-welcome-bg {
+          position: fixed;
+          inset: 0;
+          width: 100vw;
+          height: 100vh;
+          background-image: url(${fondo});
+          background-size: cover;
+          background-position: center;
+          background-repeat: no-repeat;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          overflow: hidden;
+          padding: 0;
+        }
+        .step-welcome-center {
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        .step-welcome-image {
+          width: min(90vw, 600px);
+          max-width: 600px;
+          aspect-ratio: 9/16;
+          object-fit: cover;
+          border-radius: 24px;
+          pointer-events: none;
+          user-select: none;
+          display: block;
+          transition: all 0.2s;
+        }
+        .step-welcome-btn {
+          width: min(85vw, 320px);
+          max-width: 320px;
+          font-size: 22px;
+          margin-top: 32px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+          .step-welcome-image {
+            width: 98vw;
+            max-width: 98vw;
+            border-radius: 8px;
+            margin-top: 4vw;
+            margin-bottom: 2vw;
           }
-        `}
-      </style>
+          .step-welcome-btn {
+            font-size: 16px;
+            width: 88vw;
+            max-width: 98vw;
+          }
+        }
+      `}</style>
     </div>
   );
 }
