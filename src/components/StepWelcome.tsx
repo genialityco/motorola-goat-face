@@ -1,7 +1,7 @@
 import { Button } from "@mantine/core";
 
 const fondo = "/FONDO-HOME.png";
-const textos = "/TEXTOS_HOME.png";
+const centralImage = "/TEXTOS_HOME.png";
 
 export default function StepWelcome({ next }: { next: () => void }) {
   return (
@@ -11,8 +11,6 @@ export default function StepWelcome({ next }: { next: () => void }) {
         inset: 0,
         width: "100vw",
         height: "100vh",
-        minHeight: "100dvh",
-        minWidth: "100vw",
         backgroundImage: `url(${fondo})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
@@ -20,83 +18,75 @@ export default function StepWelcome({ next }: { next: () => void }) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        flexDirection: "column",
         overflow: "hidden",
+        padding: 0,
       }}
     >
       <div
         style={{
-          position: "relative",
-          width: "100vw",
-          height: "100vh",
+          width: "100%",
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
         }}
       >
         <img
-          src={textos}
+          src={centralImage}
           alt="GOAT FACE moto ai"
           style={{
-            width: "min(97vw, 460px)",
-            height: "auto",
-            maxHeight: "85vh",
+            width: "min(90vw, 600px)",
+            maxWidth: 600,
             aspectRatio: "9/16",
-            display: "block",
-            position: "absolute",
-            left: "50%",
-            top: "50%",
-            transform: "translate(-50%, -50%)",
-            zIndex: 2,
+            objectFit: "cover",
+            borderRadius: "24px",
             pointerEvents: "none",
             userSelect: "none",
+            display: "block",
+            transition: "all 0.2s"
           }}
           draggable={false}
         />
-        {/* Botón fijo al fondo, centrado horizontal y padding responsive */}
+
         <Button
           size="xl"
-          radius="xl"
+          radius="md"
           onClick={next}
           style={{
-            position: "fixed",
-            left: "50%",
-            bottom: 32,
-            transform: "translateX(-50%)",
-            padding: "18px 60px",
+            width: "min(85vw, 320px)",
             fontWeight: 800,
             fontSize: 22,
             letterSpacing: 1,
-            background: "linear-gradient(90deg, #ff7a18, #ffb199 80%)",
-            color: "#fff",
-            boxShadow: "0 4px 18px 0 rgba(0,0,0,0.25)",
+            background: "#fff",
+            color: "#222",
+            boxShadow: "0 4px 18px 0 rgba(0,0,0,0.09)",
             border: "none",
-            zIndex: 10,
             transition: "background 0.2s, box-shadow 0.2s, transform 0.1s",
             cursor: "pointer",
           }}
-          // Efecto visual en hover/active (desktop)
-          onMouseDown={e => e.currentTarget.style.transform = "translateX(-50%) scale(0.96)"}
-          onMouseUp={e => e.currentTarget.style.transform = "translateX(-50%)"}
-          onMouseLeave={e => e.currentTarget.style.transform = "translateX(-50%)"}
+          onMouseDown={e => (e.currentTarget.style.transform = "scale(0.96)")}
+          onMouseUp={e => (e.currentTarget.style.transform = "scale(1)")}
+          onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
         >
           Comenzar
         </Button>
       </div>
-      {/* Media query para imagen y botón mobile */}
+
       <style>
         {`
           @media (max-width: 600px) {
             img[alt="GOAT FACE moto ai"] {
               width: 99vw !important;
               max-width: 99vw !important;
-              max-height: 82vh !important;
               aspect-ratio: 9/16 !important;
+              border-radius: 8px !important;
+              margin-top: 4vw !important;
+              margin-bottom: 2vw !important;
             }
             button {
-              font-size: 18px !important;
-              padding: 16px 0 !important;
-              width: 92vw !important;
-              min-width: 0 !important;
+              font-size: 16px !important;
+              width: 60vw !important;
+              max-width: 97vw !important;
             }
           }
         `}

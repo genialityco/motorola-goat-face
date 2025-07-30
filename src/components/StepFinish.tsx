@@ -7,12 +7,13 @@ const avatarFinal = "/CARA_HOMBRE_3.png";
 
 interface StepFinishProps {
   avatar: string;
-  photo: string | null; // Puede ser base64 o url pública
+  photo: string | null;
   onRestart: () => void;
 }
 
-const IMGBB_API_KEY = "f62a94925b92030ce2d0010f2a63544c"; // <-- Tu API key
+const IMGBB_API_KEY = "f62a94925b92030ce2d0010f2a63544c";
 
+// Subida directa de base64
 async function uploadToImgbb(base64: string): Promise<string | null> {
   const form = new FormData();
   form.append("image", base64.replace(/^data:image\/\w+;base64,/, ""));
@@ -32,32 +33,72 @@ async function uploadToImgbb(base64: string): Promise<string | null> {
   }
 }
 
+// Llama al backend para convertir una Drive URL en imgbb
+async function uploadDriveUrlToImgbb(driveUrl: string): Promise<string | null> {
+  const response = await fetch("http://localhost:3000/upload-drive-to-imgbb", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ driveUrl }),
+  });
+  const json = await response.json();
+  if (!json.url) throw new Error(json.error || "No se pudo subir la imagen");
+  return json.url;
+}
+
 export default function StepFinish({ photo, onRestart }: StepFinishProps) {
   const [imgbbUrl, setImgbbUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    if (photo && photo.startsWith("data:")) {
-      setUploading(true);
-      uploadToImgbb(photo).then((url) => {
-        setImgbbUrl(url);
+    let active = true;
+
+    async function processPhoto() {
+      if (!photo) {
+        setImgbbUrl(null);
         setUploading(false);
-      });
-    } else if (photo && photo.startsWith("http")) {
+        return;
+      }
+
+      setUploading(true);
+
+      if (photo.startsWith("data:")) {
+        const url = await uploadToImgbb(photo);
+        if (active) setImgbbUrl(url);
+        setUploading(false);
+        return;
+      }
+
+      if (photo.includes("drive.google.com/file/d/")) {
+        try {
+          const url = await uploadDriveUrlToImgbb(photo);
+          if (active) setImgbbUrl(url);
+        } catch (e) {
+          console.error("Error procesando imagen de Drive en backend:", e);
+          if (active) setImgbbUrl(null);
+        }
+        setUploading(false);
+        return;
+      }
+
       setImgbbUrl(photo);
       setUploading(false);
-    } else {
-      setImgbbUrl(null);
-      setUploading(false);
     }
+
+    processPhoto();
+    return () => {
+      active = false;
+    };
   }, [photo]);
 
-  const imageToShow = photo || avatarFinal;
-  const qrUrl = imgbbUrl
-    ? `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
-        imgbbUrl
-      )}&size=180x180`
-    : null;
+  const imageToShow = imgbbUrl || avatarFinal;
+  const qrUrl =
+    imgbbUrl && imgbbUrl !== avatarFinal
+      ? `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
+          imgbbUrl
+        )}&size=180x180`
+      : null;
 
   return (
     <div
@@ -79,7 +120,7 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
         overflow: "auto",
       }}
     >
-      {/* Logo arriba */}
+      {/* Logo */}
       <div
         style={{
           width: "100%",
@@ -125,9 +166,16 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
             aspectRatio: "1/1",
             borderRadius: 24,
             objectFit: "cover",
-            boxShadow: "0 0 22px #1b224188",
             display: "block",
             margin: "0 auto",
+            background: "linear-gradient(180deg, #ff6634 0%, #1ba4fd 100%)",
+            padding: "min(6px, 1vw)",
+            boxShadow: `
+              0 -12px 32px 0 #ff663499,   
+              0  14px 38px 0 #1ba4fd99,    
+              0  0px 40px 0 #14204660,   
+              0  0px 0px 2px #fff
+            `,
           }}
           draggable={false}
         />
@@ -163,7 +211,7 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
                   lineHeight: 1.2,
                 }}
               >
-                Generando QR para descargar...
+                Procesando imagen...
               </Text>
             </div>
           )}

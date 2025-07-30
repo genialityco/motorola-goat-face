@@ -1,5 +1,7 @@
-import { Text, Title } from "@mantine/core";
+import { Text } from "@mantine/core";
 import { useRef } from "react";
+import { useEffect } from "react";
+import { io } from "socket.io-client";
 
 interface Props {
   next: () => void;
@@ -11,8 +13,25 @@ const caras = "/CARAS.png";
 const cel = "/CEL.png";
 const avatar = "/CARA_HOMBRE.png";
 
+const SOCKET_URL = "http://localhost:3000";
+
 export default function StepUploadPhoto({ next, setPhoto }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const socket = io(SOCKET_URL);
+
+    socket.on("nueva-imagen", (data) => {
+      // Aquí actualizas el estado y pasas al siguiente paso
+      setPhoto(data.url);
+      next();
+    });
+
+    // Cleanup
+    return () => {
+      socket.disconnect();
+    };
+  }, [setPhoto, next]);
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
@@ -74,23 +93,6 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
             overflowY: "auto",
           }}
         >
-          {/* Título */}
-          <Title order={2} fw={300} ta="center" mb={16}>
-            Instruccion 1/3
-          </Title>
-          <Title
-            fw={600}
-            ta="center"
-            style={{
-              fontSize: "clamp(1.25rem, 4vw, 2rem)",
-              marginBottom: 10,
-              lineHeight: 1.1,
-            }}
-          >
-            ¿Quieres ponerle
-            <br />
-            cara a tu GOAT?
-          </Title>
           {/* Imagen de rostros */}
           <img
             src={caras}
@@ -123,9 +125,8 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
               src={cel}
               alt="Moto IA"
               style={{
-                width: 38,
-                height: 56,
-                marginInline: "5px",
+                width: 80,
+                height: 80,
                 minWidth: 24,
               }}
               draggable={false}
@@ -133,10 +134,10 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
             <Text
               size="md"
               fw={600}
-              style={{ fontSize: "clamp(1rem, 2.6vw, 1.23rem)" }}
+              style={{ fontSize: "clamp(1.23rem, 2.6vw, 1.23rem)" }}
             >
-              Abre Moto IA en el celular, ingresa a<br />
-              <span style={{ fontWeight: 700 }}>Image Studio</span>
+              Abre Moto IA en el celular e ingresa a{" "}
+              <strong>"Image Studio"</strong>
             </Text>
           </div>
 
@@ -159,9 +160,8 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
               src={avatar}
               alt="crear avatar"
               style={{
-                width: 55,
-                height: 55,
-                marginInline: "2px",
+                width: 80,
+                height: 80,
                 minWidth: 24,
               }}
               draggable={false}
@@ -169,10 +169,43 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
             <Text
               size="md"
               fw={600}
-              style={{ fontSize: "clamp(1rem, 2.6vw, 1.23rem)" }}
+              style={{ fontSize: "clamp(1.23rem, 2.6vw, 1.23rem)" }}
             >
-              y luego a<br />
-              <span style={{ fontWeight: 700 }}>“crear avatar”</span>
+              Entra a <strong>“Crear avatar”</strong>
+            </Text>
+          </div>
+
+          <div
+            style={{
+              background: "#f4f1ee",
+              borderRadius: 16,
+              padding: "10px 14px",
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              width: "95%",
+              marginBottom: 24,
+              minWidth: 0,
+              overflow: "hidden",
+            }}
+          >
+            <img
+              src={avatar}
+              alt="crear avatar"
+              style={{
+                width: 80,
+                height: 80,
+                minWidth: 24,
+              }}
+              draggable={false}
+            />
+            <Text
+              size="md"
+              fw={600}
+              style={{ fontSize: "clamp(1.23rem, 2.6vw, 1.23rem)" }}
+            >
+              Tomate
+              <strong> una selfie</strong>
             </Text>
           </div>
 
@@ -195,7 +228,7 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
               transition: "background .18s",
             }}
           >
-            Siguiente instrucción
+            ¡Vamos!
           </button>
           {/* Input oculto */}
           <input

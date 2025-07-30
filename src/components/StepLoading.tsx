@@ -1,14 +1,10 @@
-import { useEffect } from "react";
+import { Button, Title } from "@mantine/core";
 
 const mujer = "/MARCO_MUJER.png";
 const logo = "/LOGO_MOTO_IA.png";
 
 export default function StepLoading({ next }: { next: () => void }) {
-  useEffect(() => {
-    const t = setTimeout(next, 1800);
-    return () => clearTimeout(t);
-  }, [next]);
-
+  const isMobile = window.innerWidth <= 600;
   return (
     <div
       style={{
@@ -30,7 +26,6 @@ export default function StepLoading({ next }: { next: () => void }) {
       }}
       onClick={next}
     >
-      {/* Wrapper para mantener centrado el contenido */}
       <div
         style={{
           position: "relative",
@@ -42,37 +37,36 @@ export default function StepLoading({ next }: { next: () => void }) {
           justifyContent: "center",
         }}
       >
-        {/* Imagen principal centrada */}
+        {/* Imagen principal, más grande y en fondo */}
         <img
           src={mujer}
           alt="rostro mujer"
           style={{
-            width: "min(95vw, 450px)",
-            height: "auto",
-            maxHeight: "76vh",
-            maxWidth: "97vw",
+            width: isMobile ? "130vw" : "70vw",
+            height: isMobile ? "120vh" : "80vh",
+            objectFit: "cover",
             display: "block",
             position: "absolute",
             left: "50%",
             top: "50%",
             transform: "translate(-50%, -50%)",
-            zIndex: 2,
+            zIndex: 1,
             pointerEvents: "none",
             userSelect: "none",
           }}
           draggable={false}
         />
 
-        {/* Logo, siempre visible arriba */}
+        {/* Logo arriba */}
         <img
           src={logo}
           alt="Logo moto ai"
           style={{
             position: "absolute",
-            top: "max(4vw, 28px)",
+            top: "max(5vw, 32px)",
             left: "50%",
             transform: "translateX(-50%)",
-            width: "min(220px, 36vw)",
+            width: "min(220px, 38vw)",
             height: "auto",
             zIndex: 10,
             pointerEvents: "none",
@@ -81,97 +75,129 @@ export default function StepLoading({ next }: { next: () => void }) {
           draggable={false}
         />
 
-        {/* Loader SVG animado */}
-        <div
+        {/* Título */}
+        <Title
+          fw={400}
+          ta="center"
+          c="white"
           style={{
             position: "absolute",
-            top: "50%",
+            top: "calc(18vh + 1.5vw)",
             left: "50%",
-            width: "min(175px, 32vw)",
-            height: "min(175px, 32vw)",
-            maxWidth: 210,
-            maxHeight: 210,
-            transform: "translate(-50%, -55%)",
-            zIndex: 20,
-            pointerEvents: "none",
-            userSelect: "none",
-            animation: "spin 1.5s linear infinite",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            transform: "translateX(-50%)",
+            fontSize: "clamp(1.3rem, 4vw, 2rem)",
+            marginBottom: 10,
+            lineHeight: 1.1,
+            zIndex: 10,
+            width: "90vw",
+            maxWidth: 390,
+            textShadow: "0 2px 10px #000a",
           }}
         >
-          <svg
-            width="100%"
-            height="100%"
-            viewBox="0 0 120 120"
-            style={{
-              display: "block",
-              filter: "drop-shadow(0 0 8px #8AD5F7bb)",
-            }}
-          >
-            {[...Array(18)].map((_, i) => {
-              const angle = i * 20 - 90;
-              const rad = (angle * Math.PI) / 180;
-              const x1 = 60 + 35 * Math.cos(rad);
-              const y1 = 60 + 35 * Math.sin(rad);
-              const x2 = 60 + 50 * Math.cos(rad);
-              const y2 = 60 + 50 * Math.sin(rad);
-              const color = i % 2 === 0 ? "#A661FF" : "#FF4FC6";
-              return (
-                <line
-                  key={i}
-                  x1={x1}
-                  y1={y1}
-                  x2={x2}
-                  y2={y2}
-                  stroke={color}
-                  strokeWidth="6"
-                  strokeLinecap="round"
-                  opacity={0.85 - 0.035 * i}
-                />
-              );
-            })}
-          </svg>
-        </div>
+          ¿Quieres ponerle
+          <br />
+          cara a tu GOAT?
+        </Title>
 
-        {/* Texto en la parte inferior */}
+        {/* Texto con degradado */}
         <div
           style={{
             position: "absolute",
             left: "50%",
-            bottom: "7vw",
+            bottom: "calc(24vh + 2vw)",
             transform: "translateX(-50%)",
             width: "92vw",
-            maxWidth: 480,
+            maxWidth: 460,
             color: "#fff",
             textAlign: "center",
-            fontSize: "clamp(1.12rem, 5vw, 2.1rem)",
+            fontSize: "clamp(1.02rem, 4vw, 1.28rem)",
             fontWeight: 400,
             textShadow: "0 3px 12px #241946a0",
-            lineHeight: 1.3,
+            lineHeight: 1.32,
             zIndex: 12,
             userSelect: "none",
             letterSpacing: 0.01,
           }}
         >
-          Cargando foto a toda
-          <br />
-          velocidad gracias a la <b>IA</b>
-          <br />
-          <span style={{ color: "#8AD5F7" }}>Motorola de última</span>
-          <br />
-          <span style={{ color: "#8AD5F7" }}>
-            <b> generación</b>
+          <span
+            style={{
+              background: "linear-gradient(90deg, #ff6b37, #4fd1ff 90%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              fontWeight: 700,
+              filter: "drop-shadow(0 2px 6px #ffab5c33)",
+              fontSize: "clamp(1.05rem, 4.3vw, 1.34rem)",
+            }}
+          >
+            Hazlo ahora con el poder
+            <br />
+            revolucionario de Moto AI
           </span>
         </div>
+
+        {/* Botón */}
+        <Button
+          style={{
+            zIndex: 12,
+            position: "absolute",
+            left: "50%",
+            bottom: "10vh",
+            transform: "translateX(-50%)",
+            background: "linear-gradient(90deg, #ff784f, #ffb376 85%)",
+            fontSize: "clamp(1.09rem, 4vw, 1.4rem)",
+            padding: "0.92em 3.2em",
+            fontWeight: 800,
+            letterSpacing: 0.2,
+            border: "none",
+            boxShadow: "0 3px 16px 0 #ff864033",
+            minWidth: 120,
+            maxWidth: 320,
+          }}
+          size="compact-xl"
+          radius="md"
+          onClick={next}
+        >
+          Iniciar
+        </Button>
       </div>
 
-      {/* Animación CSS para girar */}
+      {/* Media queries para mejorar el responsive */}
       <style>
         {`
-          @keyframes spin {
-            100% { transform: translate(-50%, -55%) rotate(360deg); }
+          @media (max-width: 600px) {
+            img[alt="rostro mujer"] {
+              width: 150vw !important;
+              height: 135vh !important;
+            }
+            img[alt="Logo moto ai"] {
+              top: 12vw !important;
+              width: 40vw !important;
+            }
+            h1, .mantine-Title-root {
+              font-size: 2rem !important;
+              max-width: 93vw !important;
+            }
+            button {
+              font-size: 1rem !important;
+              min-width: 55vw !important;
+              padding-inline: 0 !important;
+            }
+            div[style*="bottom: calc(24vh"] {
+              bottom: 20vh !important;
+            }
+          }
+          @media (max-width: 420px) {
+            img[alt="Logo moto ai"] {
+              width: 53vw !important;
+            }
+            h1, .mantine-Title-root {
+              font-size: 1.07rem !important;
+            }
+            button {
+              font-size: 0.92rem !important;
+              min-width: 62vw !important;
+              padding-inline: 0 !important;
+            }
           }
         `}
       </style>

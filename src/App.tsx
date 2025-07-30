@@ -4,7 +4,7 @@ import StepWelcome from "./components/StepWelcome";
 import StepUploadPhoto from "./components/StepUploadPhoto";
 import StepLoading from "./components/StepLoading";
 import StepSuccess from "./components/StepSuccess";
-import StepCustomize from "./components/StepCustomize";
+// import StepCustomize from "./components/StepCustomize";
 import StepFinish from "./components/StepFinish";
 
 function App() {
@@ -21,11 +21,13 @@ function App() {
       <Container size="xs" p="lg">
         <Paper shadow="md" p="xl" radius="lg">
           {step === 0 && <StepWelcome next={next} />}
-          {step === 1 && (
-            <StepUploadPhoto next={next} prev={prev} setPhoto={setPhoto} />
-          )}
+          {step === 1 && <StepLoading next={next} />}
+
           {step === 2 && <StepSuccess next={next} goTo={goTo} photo={photo} />}
           {step === 3 && (
+            <StepUploadPhoto next={next} prev={prev} setPhoto={setPhoto} />
+          )}
+          {/* {step === 4 && (
             <StepCustomize
               photo={photo}
               setPhoto={(img) => {
@@ -36,9 +38,8 @@ function App() {
               next={next}
               prev={prev}
             />
-          )}
-          {step === 4 && <StepLoading next={next} />}
-          {step === 5 && (
+          )} */}
+          {step === 4 && (
             <StepFinish
               avatar={customStyle as string}
               photo={photo}
