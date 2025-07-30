@@ -323,14 +323,10 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
             textShadow: "0 2px 6px #19193940",
             marginBottom: 0,
             lineHeight: 1.24,
+            paddingInline: "50px",
           }}
         >
-          Estás a solo un paso <br />
-          de crear tu GOAT ideal
-          <br />
-          en la siguiente
-          <br />
-          actividad.
+          Estás a solo un paso de crear tu GOAT ideal en la siguiente actividad.
         </Text>
       </motion.div>
 
