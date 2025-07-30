@@ -5,7 +5,7 @@ const centralImage = "/TEXTOS_HOME.png";
 
 export default function StepWelcome({ next }: { next: () => void }) {
   return (
-    <div className="step-welcome-bg">
+    <div className="step-welcome-bg" onClick={next}>
       <div className="step-welcome-center">
         <img
           src={centralImage}
