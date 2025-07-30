@@ -12,6 +12,7 @@ interface Props {
 const caras = "/CARAS.png";
 const cel = "/CEL.png";
 const avatar = "/CARA_HOMBRE.png";
+const selfie ="/selfie.png";
 
 const SOCKET_URL = "https://moto-ai-server-wd9gh.ondigitalocean.app";
 
@@ -198,7 +199,7 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
             }}
           >
             <motion.img
-              src={avatar}
+              src={selfie}
               alt="crear avatar"
               draggable={false}
               style={{ width: 80, height: 80, minWidth: 24 }}
