@@ -1,4 +1,4 @@
-import { Text } from "@mantine/core";
+import { Loader, Text } from "@mantine/core";
 import { useRef, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { motion } from "framer-motion";
@@ -19,6 +19,8 @@ const SOCKET_URL = "https://moto-ai-server-wd9gh.ondigitalocean.app";
 export default function StepUploadPhoto({ next, setPhoto }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [waitingImage, setWaitingImage] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [mensaje, setMensaje] = useState("");
 
   useEffect(() => {
     const socket = io(SOCKET_URL);
@@ -33,6 +35,27 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
       socket.disconnect();
     };
   }, [setPhoto, next]);
+
+  const handleBuscarImagen = async () => {
+    setLoading(true);
+    setMensaje("Buscando imagen nueva en Drive...");
+
+    try {
+      // Llama a tu Apps Script webapp (GET)
+      const res = await fetch(
+        "https://script.google.com/macros/s/AKfycby3aJdFUhSotru_nT1lPBetzcSQ8JQHxBNrfAkflmHeUJKeqw4EI3kzEqTatkSdq8U/exec"
+      );
+      if (res.ok) {
+        setMensaje("Procesando... espera que aparezca tu imagen.");
+      } else {
+        setMensaje("Hubo un error buscando la imagen. Intenta de nuevo.");
+      }
+    } catch (e) {
+      console.error("Error al buscar imagen:", e);
+      setMensaje("Error de conexión. Intenta de nuevo.");
+    }
+    setLoading(false);
+  };
 
   return (
     <motion.div
@@ -102,7 +125,11 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 1, repeat: Infinity, repeatType: "mirror" }}
+              transition={{
+                duration: 1,
+                repeat: Infinity,
+                repeatType: "mirror",
+              }}
               style={{
                 color: "#ff784f",
                 fontWeight: "700",
@@ -162,7 +189,8 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
               fw={600}
               style={{ fontSize: "clamp(1.23rem, 2.6vw, 1.23rem)" }}
             >
-              Abre Moto IA en el celular e ingresa a <strong>"Image Studio"</strong>
+              Abre Moto IA en el celular e ingresa a{" "}
+              <strong>"Image Studio"</strong>
             </Text>
           </motion.div>
 
@@ -238,7 +266,6 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
 
           {/* Botón animado */}
           <motion.button
-            onClick={() => next()}
             whileHover={{ scale: 1.05, boxShadow: "0 10px 25px #ff5b9fcc" }}
             whileTap={{ scale: 0.95 }}
             style={{
@@ -256,9 +283,16 @@ export default function StepUploadPhoto({ next, setPhoto }: Props) {
               cursor: "pointer",
               transition: "background .18s",
             }}
+            disabled={loading}
+            onClick={handleBuscarImagen}
           >
-            ¡Vamos!
+            {loading ? <Loader color="white" size="xs" /> : "Vamos"}
           </motion.button>
+          {mensaje && (
+            <Text size="sm" style={{ marginTop: 8, textAlign: "center" }}>
+              {mensaje}
+            </Text>
+          )}
 
           {/* Input oculto */}
           <input
