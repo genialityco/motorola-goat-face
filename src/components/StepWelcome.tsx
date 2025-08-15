@@ -139,24 +139,20 @@ export default function StepWelcome({ next }: { next: () => void }) {
         >
           <motion.button
             onClick={handleButtonClick}
-            onMouseDown={(e) =>
-              (e.currentTarget.style.transform = "scale(0.96)")
-            }
-            onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
-            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+
             style={{
               fontWeight: 800,
               letterSpacing: 1,
               borderRadius: 8,
               border: "none",
-              padding: "18px 3.5vw",
+              padding: "10px 3.5vw",
               cursor: "pointer",
               outline: "none",
               boxShadow: "0 4px 18px 0 rgba(0,0,0,0.09)",
               color: "#222",
               background: "white",
               position: "fixed",
-              bottom: "30px",
+              bottom: "20px",
               overflow: "hidden",
               fontSize: 21,
               width: "100%",
