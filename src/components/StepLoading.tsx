@@ -1,76 +1,225 @@
-import { Button, Title } from "@mantine/core";
-import { motion } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
+import { useMemo } from "react";
 
-const mujer = "/MARCO_MUJER.png";
-const logo = "/LOGO_MOTO_IA.png";
+const centralImage = "/MARCO_MUJER.png";
+
+const TRAILS = 5;
+
+// Función para obtener coordenadas polares aleatorias para los "trails"
+function getRandomPolarCoord(radiusRange = [140, 180]) {
+  const angle = Math.random() * 2 * Math.PI;
+  const radius =
+    Math.random() * (radiusRange[1] - radiusRange[0]) + radiusRange[0];
+  return {
+    left: `calc(50% + ${Math.cos(angle) * radius}px)`,
+    top: `calc(50% + ${Math.sin(angle) * radius}px)`,
+    angle,
+    radius,
+  };
+}
+
 
 export default function StepLoading({ next }: { next: () => void }) {
-  return (
-    <div className="step-loading-bg" onClick={next}>
-      <div className="step-loading-center">
-        {/* Imagen principal con animación float/zoom */}
-        <img
-          src={mujer}
-          alt="rostro mujer"
-          className="rostro-mujer"
-          draggable={false}
-        />
+  const controls = useAnimation(); // Controla la animación del botón al hacer clic
 
-        {/* Logo animado con framer-motion */}
+  // Memoiza la creación de los "trails" para que no se recalculen en cada render
+  const trails = useMemo(
+    () =>
+      Array.from({ length: TRAILS }).map(() => ({
+        seed: Math.random(),
+        ...getRandomPolarCoord(),
+      })),
+    []
+  );
+
+  // Manejador del clic del botón, con animación de Framer Motion
+  const handleButtonClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    // Inicia una pequeña animación de escala y sombra al hacer clic
+    await controls.start({
+      scale: [1, 0.95, 1.06, 1],
+      boxShadow: [
+        "0 4px 18px 0 rgba(0,0,0,0.09)",
+        "0 1px 8px 0 rgba(0,0,0,0.13)",
+        "0 6px 36px 0 #ff6b3720",
+        "0 4px 18px 0 rgba(0,0,0,0.09)",
+      ],
+      transition: { duration: 0.38 },
+    });
+    next(); // Llama a la función 'next' pasada como prop
+  };
+
+  return (
+    <motion.div
+      className="step-welcome-bg"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+    >
+      <div className="step-welcome-center">
+        {/* Elemento para el efecto de "glow" central */}
+        <div className="step-welcome-glow" aria-hidden />
+
+        {/* Área para los "trails" animados alrededor del centro */}
+        <div className="step-welcome-trail-area">
+          {trails.map((trail, i) => (
+            <motion.span
+              key={trail.seed}
+              className="step-welcome-trail"
+              initial={{
+                opacity: 0,
+                scale: 0.4,
+                left: trail.left,
+                top: trail.top,
+              }}
+              animate={{
+                opacity: [0, 0.7, 0], // Animación de opacidad para el fade in/out
+                scale: [0.45, 1.05, 0.7], // Animación de escala para el efecto de "partícula"
+                left: [
+                  trail.left,
+                  `calc(50% + ${
+                    Math.cos(trail.angle + 0.5) * (trail.radius + 25)
+                  }px)`, // Movimiento radial
+                  trail.left,
+                ],
+                top: [
+                  trail.top,
+                  `calc(50% + ${
+                    Math.sin(trail.angle + 0.5) * (trail.radius + 25)
+                  }px)`, // Movimiento radial
+                  trail.top,
+                ],
+                rotate: [0, 40, 0], // Rotación de la partícula
+              }}
+              transition={{
+                duration: 1.9 + i * 0.17, // Duración ligeramente variada
+                delay: i * 0.45, // Retraso para que aparezcan escalonadamente
+                repeat: Infinity, // Repetir infinitamente
+                repeatType: "loop", // Repetir desde el principio
+                ease: "easeInOut",
+              }}
+              style={{
+                position: "absolute",
+                zIndex: 4,
+                pointerEvents: "none",
+                background:
+                  "linear-gradient(92deg, #fff8 25%, #ffb376 70%, #fff0 100%)",
+                filter: "blur(2px) brightness(1.16)",
+                width: 62,
+                height: 7,
+                borderRadius: 14,
+                boxShadow: "0 0 14px 0 #fff9, 0 0 22px 4px #ffb37644",
+                opacity: 0,
+              }}
+            />
+          ))}
+        </div>
+        {/* Logo superior */}
         <motion.img
-          src={logo}
-          alt="Logo moto ai"
-          className="logo-moto"
+          src="/LOGOS_SUPERIOR.png"
+          alt="Logo superior"
+          className="step-welcome-logo"
           draggable={false}
-          initial={{ opacity: 0, y: -20 }}
           animate={{
-            opacity: 1,
-            y: [0, 5, 0],
+            scale: [1, 1.04, 1],
+            y: [0, -14, 0],
           }}
           transition={{
-            duration: 3,
+            duration: 2.3,
             repeat: Infinity,
             ease: "easeInOut",
-            delay: 0.5,
           }}
         />
 
-        {/* Título animado con framer-motion */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
-        >
-          <Title fw={400} ta="center" c="white" className="step-loading-title">
-            ¿Quieres ponerle
-            <br />
-            cara a tu GOAT?
-          </Title>
-        </motion.div>
+        {/* Contenedor para la imagen y el botón (para posicionamiento relativo) */}
+        <div className="step-welcome-content">
+          {/* Imagen principal */}
+          <motion.img
+            src={centralImage}
+            alt="GOAT FACE moto ai"
+            className="step-welcome-image"
+            draggable={false}
+            animate={{
+              scale: [1, 1.04, 1],
+              y: [0, -14, 0],
+            }}
+            transition={{
+              duration: 2.3,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
 
-        {/* Texto con efecto shimmer */}
-        <div className="step-loading-gradient-text">
-          <span className="step-loading-gradient-span">
-            Hazlo ahora con el poder
-            <br />
-            revolucionario de Moto AI
-          </span>
+          {/* Texto superior */}
+          <motion.img
+            src="/TEXTOS-01.svg"
+            alt="Texto superior"
+            className="step-welcome-texto1"
+            draggable={false}
+            animate={{
+              scale: [1, 1.02, 1],
+              y: [0, -8, 0], // movimiento más suave que la mujer
+            }}
+            transition={{
+              duration: 2.3,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+
+          {/* Texto medio */}
+          <motion.img
+            src="/TEXTOS-02.svg"
+            alt="Texto medio"
+            className="step-welcome-texto2"
+            draggable={false}
+            animate={{
+              scale: [1, 1.02, 1],
+              y: [0, -8, 0],
+            }}
+            transition={{
+              duration: 2.3,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+
+          {/* Botón */}
+          <motion.div
+            className="step-welcome-btn-wrapper"
+            animate={{
+              scale: [1, 1.04, 1],
+              y: [0, -14, 0],
+            }}
+            transition={{
+              duration: 2.3,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          >
+            <motion.button
+              onClick={handleButtonClick}
+              className="step-welcome-btn"
+              animate={controls}
+              style={{
+                fontSize: "21px",
+                padding: "0",
+                boxShadow: "inset 0 4px 6px rgba(0,0,0,0.3)",
+                marginBottom: "21px"
+              }}
+            >
+              Iniciar
+            </motion.button>
+          </motion.div>
         </div>
-
-        {/* Botón con animación pulse y hover */}
-        <Button className="step-loading-btn" radius="md">
-          Iniciar
-        </Button>
       </div>
 
       <style>{`
-        .step-loading-bg {
+        .step-welcome-bg {
           position: fixed;
           inset: 0;
           width: 100vw;
           height: 100vh;
-          min-height: 100dvh;
-          min-width: 100vw;
           background-image: url("/FONDO-AZUL_02.png");
           background-size: cover;
           background-position: center;
@@ -79,175 +228,165 @@ export default function StepLoading({ next }: { next: () => void }) {
           align-items: center;
           justify-content: center;
           overflow: hidden;
-          cursor: pointer;
+          padding: 0;
+          z-index: 10;
         }
-        .step-loading-center {
-          position: relative;
+        .step-welcome-center {
           width: 100vw;
-          height: 100vh;
+          min-height: 100vh;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          padding-left: 12px;  /* margen horizontal para no tocar bordes */
-          padding-right: 12px;
+          position: relative;
+          padding: 0 12px;
+          box-sizing: border-box;
         }
-        /* Imagen con animación float + zoom */
-        @keyframes floatZoom {
-          0%, 100% { transform: translate(-50%, -50%) scale(1); }
-          50% { transform: translate(calc(-50% + 8px), calc(-50% + 6px)) scale(1.05); }
+        .step-welcome-content {
+          position: relative; /* Contenedor de la imagen y el botón */
+          display: flex;
+          justify-content: center;
+          align-items: center;
         }
-        .rostro-mujer {
-          width: 70vw;
-          height: 80vh;
-          object-fit: cover;
+        .step-welcome-trail-area {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          pointer-events: none;
+          z-index: 4;
+        }
+        .step-welcome-trail {
+          opacity: 0;
+        }
+        .step-welcome-glow {
+          position: absolute;
+          top: 48%;
+          left: 50%;
+          transform: translate(-50%, -52%);
+          width: 480px;
+          height: 600px;
+          background: radial-gradient(ellipse at 50% 50%, #ff6b37b0 0 36%, #ffb37635 65%, #fff0 100%);
+          filter: blur(40px) brightness(1.13) saturate(1.15);
+          z-index: 0;
+          opacity: 0.55;
+          animation: step-glow 3.8s ease-in-out infinite alternate;
+          pointer-events: none;
+          user-select: none;
+          transition: width 0.3s, height 0.3s;
+        }
+        @keyframes step-glow {
+          0% { opacity: 0.45; filter: blur(40px) brightness(1.1);}
+          50% { opacity: 0.68; filter: blur(60px) brightness(1.20);}
+          100% { opacity: 0.5; filter: blur(40px) brightness(1.13);}
+        }
+        .step-welcome-image {
+          width: 340px;
+          max-width: 92vw;
+          aspect-ratio: 9.5 / 16;
+          object-fit: contain;
+          pointer-events: none;
+          user-select: none;
           display: block;
-          position: absolute;
-          left: 50%;
-          top: 50%;
-          transform: translate(-50%, -50%);
-          z-index: 1;
+          transition: all 0.22s;
+          position: relative;
+          z-index: 2;
+          background: none;
+        }
+        
+        .step-welcome-logo {
+          transform: translateX(-50%);
+          width: 250px;       /* ajusta el tamaño del logo */
+          z-index: 3;         /* encima de la mujer pero debajo del botón */
           pointer-events: none;
-          user-select: none;
-          animation: floatZoom 8s ease-in-out infinite;
-        }
-        /* Logo sin animación CSS (framer-motion lo anima) */
-        .logo-moto {
-          position: absolute;
-          top: max(5vw, 32px);
-          transform: translateX(-50%);
-          width: min(220px, 38vw);
-          height: auto;
-          z-index: 10;
-          pointer-events: none;
-          user-select: none;
-        }
-        /* Título con sombra pulsante */
-        @keyframes glowPulse {
-          0%, 100% { text-shadow: 0 2px 10px #000a; }
-          50% { text-shadow: 0 2px 20px #ff6b37cc; }
-        }
-        .step-loading-title {
-          position: absolute;
-          top: calc(18vh + 1.5vw);
-          left: 50%;
-          transform: translateX(-50%);
-          font-size: clamp(1.3rem, 4vw, 2rem);
-          margin-bottom: 10px;
-          line-height: 1.1;
-          z-index: 10;
-          width: 90vw;
-          max-width: 390px;
-          animation: glowPulse 3.5s ease-in-out infinite;
-          user-select: none;
-          color: white;
-        }
-        /* Texto con efecto shimmer */
-        @keyframes shimmer {
-          0% {
-            background-position: -200% 0;
-          }
-          100% {
-            background-position: 200% 0;
-          }
-        }
-        .step-loading-gradient-text {
-          position: absolute;
-          left: 50%;
-          bottom: calc(24vh + 2vw);
-          transform: translateX(-50%);
-          width: 92vw;
-          max-width: 460px;
-          color: #fff;
-          text-align: center;
-          font-size: clamp(1.02rem, 4vw, 1.28rem);
-          font-weight: 400;
-          text-shadow: 0 3px 12px #241946a0;
-          line-height: 1.32;
-          z-index: 12;
-          user-select: none;
-          letter-spacing: 0.01em;
-        }
-        .step-loading-gradient-span {
-          background: linear-gradient(90deg, #ff6b37 20%, #4fd1ff 40%, #ff6b37 60%);
-          background-size: 200% 100%;
-          animation: shimmer 4s linear infinite;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          font-weight: 700;
-          filter: drop-shadow(0 2px 6px #ffab5c33);
-          font-size: clamp(1.05rem, 4.3vw, 1.34rem);
-        }
-        /* Botón con animación pulse en sombra y hover */
-        @keyframes pulseShadow {
-          0%, 100% {
-            box-shadow: 0 3px 16px 0 #ff864033;
-          }
-          50% {
-            box-shadow: 0 6px 24px 0 #ffb37666;
-          }
-        }
-        .step-loading-btn {
-          z-index: 12;
-          position: absolute;
-          left: 50%;
-          bottom: 10vh;
-          transform: translateX(-50%);
-          background: linear-gradient(90deg, #ff784f, #ffb376 85%);
-          font-size: clamp(1.09rem, 4vw, 1.4rem);
-          font-weight: 800;
-          padding-inline: 5em;
-          letter-spacing: 0.2em;
-          border: none;
-          box-shadow: 0 3px 16px 0 #ff864033;
-          min-width: 120px;
-          max-width: 320px;
-          animation: pulseShadow 3s ease-in-out infinite;
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-          cursor: pointer;
-        }
-        .step-loading-btn:hover {
-          transform: scale(1.05);
-          box-shadow: 0 8px 32px 0 #ffb376cc;
+          margin-bottom: 20px; /* Espacio entre el logo y la imagen */
         }
 
-        /* MOBILE */
+        .step-welcome-btn-wrapper {
+          position: absolute; /* Posicionamiento absoluto respecto a .step-welcome-content */
+          bottom: 30px; /* Distancia desde la parte inferior de la imagen */
+          transform: translateX(-50%); /* Ajuste fino para centrar */
+          z-index: 3; /* Asegura que esté encima de la imagen */
+          display: flex; /* Para centrar el botón dentro del wrapper si es necesario */
+          justify-content: center;
+          align-items: center;
+        }
+        .step-welcome-btn {
+          font-weight: 800;
+          letter-spacing: 1px;
+          border-radius: 4px;
+          border: none;
+          cursor: pointer;
+          outline: none;
+          background: #3d95ff;
+          color: white;
+          overflow: hidden;
+          width: 100%;
+          max-width: 200px;
+          min-width: 140px;
+          box-sizing: border-box;
+        }
+
+        /* Texto 01: arriba de la mujer */
+        .step-welcome-texto1 {
+          position: absolute;
+          top: 8%;              /* lo ubica en la parte superior de la imagen */
+          transform: translateX(-50%);
+          width: 70%;           /* ajusta el tamaño relativo a la mujer */
+          max-width: 260px;
+          z-index: 3;
+          pointer-events: none;
+        }
+
+        /* Texto 02: más abajo de la mitad */
+        .step-welcome-texto2 {
+          position: absolute;
+          top: 70%;             /* más abajo de la mitad de la imagen */
+          transform: translateX(-50%);
+          width: 65%;           /* un poco más pequeño */
+          max-width: 240px;
+          z-index: 3;
+          pointer-events: none;
+        }
+
+        /* Tabletas y portátiles */
+        @media (max-width: 1024px) {
+          .step-welcome-image { width: 300px; max-width: 80vw; }
+          .step-welcome-glow { width: 340px; height: 420px; }
+          .step-welcome-btn-wrapper { bottom: 15px; } /* Ajuste para tabletas */
+        }
+        /* Celulares grandes */
         @media (max-width: 600px) {
-          .rostro-mujer {
-            width: 150vw !important;
-            height: 135vh !important;
+          .step-welcome-image {
+            width: 90vw;
+            max-width: 90vw;
+            border-radius: 11px;
           }
-          .logo-moto {
-            top: 12vw !important;
-            width: 40vw !important;
+          .step-welcome-center {
+            justify-content: center;
+            padding-top: 5vh;
           }
-          .step-loading-title {
-            font-size: 2rem !important;
-            max-width: 93vw !important;
-          }
-          .step-loading-btn {
-            font-size: 1rem !important;
-            min-width: 55vw !important;
-            padding-inline: 0 !important;
-          }
-          .step-loading-gradient-text {
-            bottom: 20vh !important;
+          .step-welcome-btn-wrapper { bottom: 10px; } /* Ajuste para celulares */
+          .step-welcome-btn {
+            font-size: 16px;
+            padding: 15px 0;
+            max-width: 180px;
           }
         }
-        @media (max-width: 420px) {
-          .logo-moto {
-            width: 53vw !important;
+        /* Celulares XS */
+        @media (max-width: 400px) {
+          .step-welcome-image {
+            width: 92vw;
           }
-          .step-loading-title {
-            font-size: 1.07rem !important;
-          }
-          .step-loading-btn {
-            font-size: 0.92rem !important;
-            min-width: 62vw !important;
-            padding-inline: 0 !important;
+          .step-welcome-btn-wrapper { bottom: 5px; } /* Ajuste para celulares pequeños */
+          .step-welcome-btn {
+            font-size: 14px;
+            padding: 11px 0;
+            max-width: 160px;
           }
         }
       `}</style>
-    </div>
+    </motion.div>
   );
 }

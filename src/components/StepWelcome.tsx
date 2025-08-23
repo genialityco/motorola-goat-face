@@ -2,10 +2,11 @@ import { motion, useAnimation } from "framer-motion";
 import { useMemo } from "react";
 
 const fondo = "/FONDO-HOME.png";
-const centralImage = "/TEXTOS_HOME.png";
+const centralImage = "/CUADRO-INICIO.png";
 
 const TRAILS = 5;
 
+// Función para obtener coordenadas polares aleatorias para los "trails"
 function getRandomPolarCoord(radiusRange = [140, 180]) {
   const angle = Math.random() * 2 * Math.PI;
   const radius =
@@ -19,8 +20,9 @@ function getRandomPolarCoord(radiusRange = [140, 180]) {
 }
 
 export default function StepWelcome({ next }: { next: () => void }) {
-  const controls = useAnimation();
+  const controls = useAnimation(); // Controla la animación del botón al hacer clic
 
+  // Memoiza la creación de los "trails" para que no se recalculen en cada render
   const trails = useMemo(
     () =>
       Array.from({ length: TRAILS }).map(() => ({
@@ -30,8 +32,10 @@ export default function StepWelcome({ next }: { next: () => void }) {
     []
   );
 
+  // Manejador del clic del botón, con animación de Framer Motion
   const handleButtonClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
+    // Inicia una pequeña animación de escala y sombra al hacer clic
     await controls.start({
       scale: [1, 0.95, 1.06, 1],
       boxShadow: [
@@ -42,7 +46,7 @@ export default function StepWelcome({ next }: { next: () => void }) {
       ],
       transition: { duration: 0.38 },
     });
-    next();
+    next(); // Llama a la función 'next' pasada como prop
   };
 
   return (
@@ -53,8 +57,10 @@ export default function StepWelcome({ next }: { next: () => void }) {
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
       <div className="step-welcome-center">
+        {/* Elemento para el efecto de "glow" central */}
         <div className="step-welcome-glow" aria-hidden />
 
+        {/* Área para los "trails" animados alrededor del centro */}
         <div className="step-welcome-trail-area">
           {trails.map((trail, i) => (
             <motion.span
@@ -67,29 +73,29 @@ export default function StepWelcome({ next }: { next: () => void }) {
                 top: trail.top,
               }}
               animate={{
-                opacity: [0, 0.7, 0],
-                scale: [0.45, 1.05, 0.7],
+                opacity: [0, 0.7, 0], // Animación de opacidad para el fade in/out
+                scale: [0.45, 1.05, 0.7], // Animación de escala para el efecto de "partícula"
                 left: [
                   trail.left,
                   `calc(50% + ${
                     Math.cos(trail.angle + 0.5) * (trail.radius + 25)
-                  }px)`,
+                  }px)`, // Movimiento radial
                   trail.left,
                 ],
                 top: [
                   trail.top,
                   `calc(50% + ${
                     Math.sin(trail.angle + 0.5) * (trail.radius + 25)
-                  }px)`,
+                  }px)`, // Movimiento radial
                   trail.top,
                 ],
-                rotate: [0, 40, 0],
+                rotate: [0, 40, 0], // Rotación de la partícula
               }}
               transition={{
-                duration: 1.9 + i * 0.17,
-                delay: i * 0.45,
-                repeat: Infinity,
-                repeatType: "loop",
+                duration: 1.9 + i * 0.17, // Duración ligeramente variada
+                delay: i * 0.45, // Retraso para que aparezcan escalonadamente
+                repeat: Infinity, // Repetir infinitamente
+                repeatType: "loop", // Repetir desde el principio
                 ease: "easeInOut",
               }}
               style={{
@@ -109,76 +115,53 @@ export default function StepWelcome({ next }: { next: () => void }) {
           ))}
         </div>
 
-        <motion.img
-          src={centralImage}
-          alt="GOAT FACE moto ai"
-          className="step-welcome-image"
-          draggable={false}
-          animate={{
-            scale: [1, 1.04, 1],
-            y: [0, -14, 0],
-          }}
-          transition={{
-            duration: 2.3,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-
-        <motion.div
-          animate={controls}
-          whileHover={{
-            scale: 1.045,
-            boxShadow: "0 8px 24px 0 #ffb37644, 0 2px 9px 0 rgba(0,0,0,0.14)",
-          }}
-          style={{
-            display: "inline-block",
-            width: "90vw",
-            maxWidth: 320,
-          }}
-        >
-          <motion.button
-            onClick={handleButtonClick}
-
-            style={{
-              fontWeight: 800,
-              letterSpacing: 1,
-              borderRadius: 8,
-              border: "none",
-              padding: "10px 3.5vw",
-              cursor: "pointer",
-              outline: "none",
-              boxShadow: "0 4px 18px 0 rgba(0,0,0,0.09)",
-              color: "#222",
-              background: "white",
-              position: "fixed",
-              bottom: "20px",
-              overflow: "hidden",
-              fontSize: 21,
-              width: "100%",
-              maxWidth: 320,
-              minWidth: 180,
-              boxSizing: "border-box",
-            }}
+        {/* Contenedor para la imagen y el botón (para posicionamiento relativo) */}
+        <div className="step-welcome-content">
+          <motion.img
+            src={centralImage}
+            alt="GOAT FACE moto ai"
+            className="step-welcome-image"
+            draggable={false}
+            // Animación de escala y movimiento vertical para la imagen
             animate={{
-              backgroundPosition: ["200% 0", "0% 0"],
-              backgroundSize: ["200% 100%", "200% 100%"],
-              color: ["#222", "#ff7f32", "#222"],
-              backgroundImage: [
-                "linear-gradient(90deg, #fff 40%, #ffb376 50%, #fff 60%)",
-                "linear-gradient(90deg, #ffb376 40%, #fff 50%, #ffb376 60%)",
-                "linear-gradient(90deg, #fff 40%, #ffb376 50%, #fff 60%)",
-              ],
+              scale: [1, 1.04, 1], // Escala para efecto de "respiración"
+              y: [0, -14, 0], // Movimiento vertical suave
             }}
             transition={{
-              duration: 3,
+              duration: 2.3, // Duración de la animación
+              repeat: Infinity, // Repetir infinitamente
+              ease: "easeInOut",
+            }}
+          />
+
+          {/* Contenedor para el botón que también se anima con la imagen */}
+          <motion.div
+            className="step-welcome-btn-wrapper"
+            animate={{
+              scale: [1, 1.04, 1],
+              y: [0, -14, 0],
+            }}
+            transition={{
+              duration: 2.3, // Misma duración que la imagen para sincronizar
               repeat: Infinity,
               ease: "easeInOut",
             }}
+            style={{ marginBottom: "32px" }}
           >
-            Comenzar
-          </motion.button>
-        </motion.div>
+            <motion.button
+              onClick={handleButtonClick}
+              className="step-welcome-btn"
+              animate={controls}
+              style={{
+                fontSize: "21px",
+                padding: "0",
+                boxShadow: "inset 0 4px 6px rgba(0,0,0,0.3)",
+              }}
+            >
+              Comenzar
+            </motion.button>
+          </motion.div>
+        </div>
       </div>
 
       <style>{`
@@ -206,9 +189,14 @@ export default function StepWelcome({ next }: { next: () => void }) {
           align-items: center;
           justify-content: center;
           position: relative;
-          gap: 36px;
-          padding: 0 12px; /* agregar para evitar tocar bordes */
+          padding: 0 12px;
           box-sizing: border-box;
+        }
+        .step-welcome-content {
+          position: relative; /* Contenedor de la imagen y el botón */
+          display: flex;
+          justify-content: center;
+          align-items: center;
         }
         .step-welcome-trail-area {
           position: absolute;
@@ -239,15 +227,15 @@ export default function StepWelcome({ next }: { next: () => void }) {
           transition: width 0.3s, height 0.3s;
         }
         @keyframes step-glow {
-          0%   { opacity: 0.45; filter: blur(40px) brightness(1.1);}
-          50%  { opacity: 0.68; filter: blur(60px) brightness(1.20);}
+          0% { opacity: 0.45; filter: blur(40px) brightness(1.1);}
+          50% { opacity: 0.68; filter: blur(60px) brightness(1.20);}
           100% { opacity: 0.5; filter: blur(40px) brightness(1.13);}
         }
         .step-welcome-image {
           width: 340px;
           max-width: 92vw;
-          aspect-ratio: 9 / 16;
-          object-fit: cover;
+          aspect-ratio: 9.5 / 16;
+          object-fit: contain;
           border-radius: 22px;
           pointer-events: none;
           user-select: none;
@@ -257,39 +245,65 @@ export default function StepWelcome({ next }: { next: () => void }) {
           z-index: 2;
           background: none;
         }
+        .step-welcome-btn-wrapper {
+          position: absolute; /* Posicionamiento absoluto respecto a .step-welcome-content */
+          bottom: 30px; /* Distancia desde la parte inferior de la imagen */
+          transform: translateX(-50%); /* Ajuste fino para centrar */
+          z-index: 3; /* Asegura que esté encima de la imagen */
+          display: flex; /* Para centrar el botón dentro del wrapper si es necesario */
+          justify-content: center;
+          align-items: center;
+        }
         .step-welcome-btn {
-          font-size: 21px;
-          margin-top: 10px;
-          z-index: 3;
-          padding: 18px 0;
+          font-weight: 600;
+          letter-spacing: 1px;
+          border-radius: 4px;
+          border: none;
+          cursor: pointer;
+          outline: none;
+          background: white;
+          color: #210d93ff;
+          overflow: hidden;
+          width: 100%;
+          max-width: 200px;
+          min-width: 140px;
+          box-sizing: border-box;
         }
         /* Tabletas y portátiles */
         @media (max-width: 1024px) {
-          .step-welcome-image { width: 260px; }
+          .step-welcome-image { width: 300px; max-width: 80vw; }
           .step-welcome-glow { width: 340px; height: 420px; }
+          .step-welcome-btn-wrapper { bottom: 15px; } /* Ajuste para tabletas */
         }
         /* Celulares grandes */
         @media (max-width: 600px) {
           .step-welcome-image {
-            width: 98vw;
-            max-width: 98vw;
+            width: 90vw;
+            max-width: 90vw;
             border-radius: 11px;
-            margin-top: 4vw;
-            margin-bottom: 2vw;
           }
+          .step-welcome-center {
+            justify-content: center;
+            padding-top: 5vh;
+          }
+          .step-welcome-btn-wrapper { bottom: 10px; } /* Ajuste para celulares */
           .step-welcome-btn {
-            font-size: 16px !important;
-            padding: 15px 0 !important;
+            font-size: 16px;
+            padding: 15px 0;
+            max-width: 180px;
           }
         }
         /* Celulares XS */
         @media (max-width: 400px) {
-          .step-welcome-btn {
-            font-size: 14px !important;
-            margin-top: 6vw;
-            padding: 11px 0 !important;
+          .step-welcome-image {
+            width: 92vw;
           }
-          .step-welcome-image { border-radius: 7px; }
+          .step-welcome-btn-wrapper { bottom: 5px; } /* Ajuste para celulares pequeños */
+          .step-welcome-btn {
+            font-size: 14px;
+            padding: 11px 0;
+            max-width: 160px;
+          }
         }
       `}</style>
     </motion.div>

@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react";
-import { Text, Loader } from "@mantine/core";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Text } from "@mantine/core";
 import { motion } from "framer-motion";
+import * as htmlToImage from "html-to-image";
 
-const logo = "/LOGO_MOTO_IA.png";
+const logo = "/LOGOS_SUPERIOR.png";
 const logosFooter = "/LOGOS.png";
 const avatarFinal = "/CARA_HOMBRE_3.png";
+const frameSrc = "/ESCUDO.png";
 
 interface StepFinishProps {
   avatar: string;
@@ -12,95 +15,210 @@ interface StepFinishProps {
   onRestart: () => void;
 }
 
-const IMGBB_API_KEY = "f62a94925b92030ce2d0010f2a63544c";
+const SERVER_URL = "https://moto-ai-server-wd9gh.ondigitalocean.app";
 
-async function uploadToImgbb(base64: string): Promise<string | null> {
-  const form = new FormData();
-  form.append("image", base64.replace(/^data:image\/\w+;base64,/, ""));
+// --- Upload helpers ---
+async function uploadBase64ToFirebase(base64: string): Promise<string | null> {
   try {
-    const res = await fetch(
-      `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,
-      {
-        method: "POST",
-        body: form,
-      }
-    );
+    const res = await fetch(`${SERVER_URL}/upload-base64-to-firebase`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ base64 }),
+    });
     const json = await res.json();
-    return json.data?.url || null;
+    if (!res.ok) throw new Error(json?.error || "Error subiendo base64");
+    return json.url as string;
   } catch (e) {
-    console.error("Error uploading to imgbb:", e);
+    console.error(e);
+    return null;
+  }
+}
+async function uploadDriveUrlToFirebase(
+  driveUrl: string
+): Promise<string | null> {
+  try {
+    const res = await fetch(`${SERVER_URL}/upload-drive-to-firebase`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ driveUrl }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json?.error || "Error subiendo desde Drive");
+    return json.url as string;
+  } catch (e) {
+    console.error(e);
     return null;
   }
 }
 
-async function uploadDriveUrlToImgbb(driveUrl: string): Promise<string | null> {
-  const response = await fetch(
-    "https://moto-ai-server-wd9gh.ondigitalocean.app/upload-drive-to-imgbb",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ driveUrl }),
-    }
+/** Foto recortada con máscara de escudo (438×454) + PNG del marco encima */
+function ShieldPhoto({
+  src,
+  size = 200,
+  MASK_INSET = 12,
+  OFFSET_Y = -4,
+}: {
+  src: string;
+  size?: number;
+  MASK_INSET?: number;
+  OFFSET_Y?: number;
+}) {
+  const W = 438;
+  const H = 454;
+  const sx = (W - MASK_INSET * 2) / W;
+  const sy = (H - MASK_INSET * 2) / H;
+  const tx = MASK_INSET;
+  const ty = MASK_INSET;
+
+  return (
+    <div style={{ position: "relative", width: size, height: size }}>
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        preserveAspectRatio="xMidYMid meet"
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+        }}
+      >
+        <defs>
+          <mask id="shieldMask" maskUnits="userSpaceOnUse">
+            <rect x="0" y="0" width={W} height={H} fill="black" />
+            <g transform={`translate(${tx},${ty}) scale(${sx} ${sy})`}>
+              <path
+                fill="white"
+                d="
+                M219,18
+                C 300,45 354,62 394,70
+                L 394,260
+                C 394,342 305,405 219,438
+                C 133,405 44,342 44,260
+                L 44,70
+                C 84,62 138,45 219,18
+                Z
+              "
+              />
+            </g>
+          </mask>
+        </defs>
+
+        <image
+          href={src}
+          x="0"
+          y="0"
+          width={W}
+          height={H}
+          preserveAspectRatio="xMidYMid slice"
+          mask="url(#shieldMask)"
+          style={{ transform: `translateY(${OFFSET_Y}px)` }}
+        />
+      </svg>
+
+      <img
+        src={frameSrc}
+        alt="Marco escudo"
+        crossOrigin="anonymous"
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "contain",
+          pointerEvents: "none",
+          userSelect: "none",
+          filter:
+            "drop-shadow(0 10px 24px rgba(27,164,253,0.28)) drop-shadow(0 -6px 18px rgba(255,102,52,0.18))",
+        }}
+        draggable={false}
+      />
+    </div>
   );
-  const json = await response.json();
-  if (!json.url) throw new Error(json.error || "No se pudo subir la imagen");
-  return json.url;
 }
 
 export default function StepFinish({ photo, onRestart }: StepFinishProps) {
-  const [imgbbUrl, setImgbbUrl] = useState<string | null>(null);
+  const [firebaseUrl, setFirebaseUrl] = useState<string | null>(null);
+  const [compositeUrl, setCompositeUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [generating, setGenerating] = useState(false);
 
+  // ÚNICO ref que se captura (incluye el fondo azul)
+  const captureRef = useRef<HTMLDivElement>(null);
+
+  // 1) Subir foto base si viene en base64/drive
   useEffect(() => {
     let active = true;
-
-    async function processPhoto() {
+    (async () => {
       if (!photo) {
-        setImgbbUrl(null);
+        setFirebaseUrl(null);
         setUploading(false);
         return;
       }
-
       setUploading(true);
-
-      if (photo.startsWith("data:")) {
-        const url = await uploadToImgbb(photo);
-        if (active) setImgbbUrl(url);
-        setUploading(false);
-        return;
-      }
-
-      if (photo.includes("drive.google.com/file/d/")) {
-        try {
-          const url = await uploadDriveUrlToImgbb(photo);
-          if (active) setImgbbUrl(url);
-        } catch (e) {
-          console.error("Error procesando imagen de Drive en backend:", e);
-          if (active) setImgbbUrl(null);
+      try {
+        if (photo.startsWith("data:")) {
+          const url = await uploadBase64ToFirebase(photo);
+          if (active) setFirebaseUrl(url);
+        } else if (photo.includes("drive.google.com/file/d/")) {
+          const url = await uploadDriveUrlToFirebase(photo);
+          if (active) setFirebaseUrl(url);
+        } else {
+          if (active) setFirebaseUrl(photo);
         }
-        setUploading(false);
-        return;
+      } catch {
+        if (active) setFirebaseUrl(null);
+      } finally {
+        if (active) setUploading(false);
       }
-
-      setImgbbUrl(photo);
-      setUploading(false);
-    }
-
-    processPhoto();
+    })();
     return () => {
       active = false;
     };
   }, [photo]);
 
-  const imageToShow = imgbbUrl || avatarFinal;
-  const qrUrl =
-    imgbbUrl && imgbbUrl !== avatarFinal
-      ? `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
-          imgbbUrl
-        )}&size=180x180`
-      : null;
+  const imageToShow = firebaseUrl || avatarFinal;
+
+  // 2) Generar PNG del contenedor (sin QR ni Reiniciar) y subirlo a Firebase
+  useEffect(() => {
+    let cancelled = false;
+    async function generateComposite() {
+      if (!firebaseUrl || !captureRef.current) return;
+      if (generating) return;
+      setGenerating(true);
+      try {
+        await new Promise((r) => requestAnimationFrame(() => r(null)));
+        const node = captureRef.current;
+        const rect = node.getBoundingClientRect();
+        const dataUrl = await htmlToImage.toPng(node, {
+          pixelRatio: 2,
+          cacheBust: true,
+          width: rect.width,
+          height: rect.height,
+        });
+        if (cancelled) return;
+        const uploaded = await uploadBase64ToFirebase(dataUrl);
+        if (!cancelled) setCompositeUrl(uploaded);
+      } catch (e) {
+        console.error("No se pudo generar la imagen compuesta:", e);
+      } finally {
+        if (!cancelled) setGenerating(false);
+      }
+    }
+    generateComposite();
+    return () => {
+      cancelled = true;
+    };
+  }, [firebaseUrl]);
+
+  // 3) QR centrado en UI, apunta a imagen compuesta
+  const qrUrl = useMemo(() => {
+    if (!compositeUrl) return null;
+    return `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
+      compositeUrl
+    )}&size=180x180`;
+  }, [compositeUrl]);
+
+  const FRAME_MAX = 200;
 
   return (
     <motion.div
@@ -113,290 +231,231 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
         width: "100vw",
         height: "100vh",
         minHeight: "100dvh",
-        minWidth: "100vw",
-        backgroundImage: 'url("/FONDO-AZUL_01.png")',
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "space-between",
-        paddingTop: "env(safe-area-inset-top, 20px)",
-        paddingBottom: "env(safe-area-inset-bottom, 20px)",
-        overflow: "auto", // permitir scroll solo si es necesario
+        overflow: "hidden",
         boxSizing: "border-box",
       }}
     >
-      {/* Logo */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1 }}
+      {/* ⬇️ CONTENEDOR CAPTURADO (con FONDO AZUL) */}
+      <div
+        ref={captureRef}
         style={{
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-          marginTop: "min(7vw, 38px)",
-          marginBottom: "min(4vw, 18px)",
-          flexShrink: 0,
-        }}
-      >
-        <img
-          src={logo}
-          alt="Logo moto ai"
-          style={{
-            width: "min(65vw, 250px)",
-            maxWidth: 230,
-            height: "auto",
-            userSelect: "none",
-            pointerEvents: "none",
-            display: "block",
-          }}
-          draggable={false}
-        />
-      </motion.div>
-
-      {/* Avatar + QR */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1, delay: 0.3 }}
-        style={{
-          width: "100%",
-          maxWidth: 320,
+          position: "relative",
+          width: "100vw",
+          height: "100vh",
+          minHeight: "100dvh",
+          backgroundImage: 'url("/FONDO-AZUL_01.png")',
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: "min(4vw, 20px)",
-          marginBottom: "min(6vw, 30px)",
-          flexShrink: 1, // permite reducción en pantallas pequeñas
+          justifyContent: "space-between",
+          paddingTop: "env(safe-area-inset-top, 20px)",
+          paddingBottom: "env(safe-area-inset-bottom, 20px)",
           boxSizing: "border-box",
-          paddingInline: 12,
         }}
       >
-        <motion.img
-          src={imageToShow}
-          alt="Avatar final"
-          style={{
-            width: "100%",
-            maxWidth: 180,
-            maxHeight: 180,
-            aspectRatio: "1 / 1",
-            borderRadius: 24,
-            objectFit: "cover",
-            background: "linear-gradient(180deg, #ff6634 0%, #1ba4fd 100%)",
-            padding: "min(6px, 1vw)",
-            boxShadow: `
-              0 -12px 32px 0 #ff663499,
-              0 14px 38px 0 #1ba4fd99,
-              0 0px 40px 0 #14204660,
-              0 0px 0px 2px #fff
-            `,
-            userSelect: "none",
-            pointerEvents: "none",
-            margin: "0 auto",
-          }}
-          draggable={false}
-          animate={{
-            scale: [1, 1.03, 1],
-            boxShadow: [
-              `0 -12px 32px 0 #ff663499,
-               0 14px 38px 0 #1ba4fd99,
-               0 0px 40px 0 #14204660,
-               0 0px 12px 4px #ff784fbb`,
-              `0 -12px 44px 0 #ff7a5aaa,
-               0 14px 44px 0 #45c0f9aa,
-               0 0px 55px 0 #142046aa,
-               0 0px 12px 8px #ff9a78cc`,
-              `0 -12px 32px 0 #ff663499,
-               0 14px 38px 0 #1ba4fd99,
-               0 0px 40px 0 #14204660,
-               0 0px 0px 2px #fff`,
-            ],
-          }}
-          transition={{
-            duration: 4,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-
         <div
           style={{
+            width: "100%",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: 6,
-            minHeight: 130,
+            gap: 16,
           }}
         >
-          {uploading && (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                minHeight: 128,
-                justifyContent: "center",
-              }}
-            >
-              <Loader color="blue" size="md" />
-              <Text
-                size="sm"
-                c="#fff"
-                style={{
-                  fontWeight: 500,
-                  textAlign: "center",
-                  marginTop: 12,
-                  maxWidth: 160,
-                  lineHeight: 1.2,
-                }}
-              >
-                Procesando imagen...
-              </Text>
-            </div>
-          )}
-          {!uploading && qrUrl && (
-            <>
-              <motion.img
-                src={qrUrl}
-                alt="Código QR para descargar tu imagen"
-                style={{
-                  width: "100%",
-                  maxWidth: 160,
-                  maxHeight: 160,
-                  aspectRatio: "1 / 1",
-                  background: "#fff",
-                  borderRadius: 8,
-                  boxShadow: "0 0 10px #2AB8FF44",
-                  marginBottom: 2,
-                  marginTop: 8,
-                  userSelect: "none",
-                  pointerEvents: "none",
-                }}
-                draggable={false}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8 }}
-              />
-              <Text
-                size="sm"
-                c="#fff"
-                style={{
-                  fontWeight: 500,
-                  textAlign: "center",
-                  textShadow: "0 2px 8px #1b224188",
-                  lineHeight: 1.15,
-                  marginTop: 2,
-                  marginBottom: 4,
-                  maxWidth: 120,
-                  userSelect: "none",
-                }}
-              >
-                Escanea para descargar tu imagen
-              </Text>
-            </>
-          )}
-        </div>
-      </motion.div>
+          {/* Top logo */}
+          <img
+            src={logo}
+            alt="Logo moto ai"
+            crossOrigin="anonymous"
+            style={{
+              width: "min(90vw, 400px)",
+              maxWidth: 350,
+              marginTop: "min(10vw, 30px)",
+            }}
+            draggable={false}
+          />
 
-      {/* Mensaje central */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.9, delay: 0.4 }}
+          {/* Escudo */}
+          <ShieldPhoto
+            src={imageToShow}
+            size={Math.min(520, FRAME_MAX)}
+            MASK_INSET={12}
+            OFFSET_Y={-4}
+          />
+
+          {/* Título */}
+          <Text
+            style={{
+              color: "#fff",
+              fontWeight: 700,
+              fontSize: "clamp(1.5rem, 4vw, 24px)",
+              textShadow: "0 2px 6px #19193940",
+              marginBottom: 0,
+              lineHeight: 1.24,
+            }}
+          >
+            ¡Listo!
+          </Text>
+
+          {/* Texto inferior (SVG) */}
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "center",
+              marginTop: 6,
+            }}
+          >
+            <img
+              src="/TEXTOS-05.svg"
+              alt="Texto GOAT"
+              crossOrigin="anonymous"
+              style={{
+                width: "min(70vw, 320px)",
+                height: "auto",
+                opacity: 0.95,
+                display: "block",
+                userSelect: "none",
+                pointerEvents: "none",
+                position: "absolute",
+                bottom: 145,
+              }}
+            />
+          </div>
+
+          {/* Footer logos */}
+          <div
+            style={{
+              width: "100%",
+              maxWidth: 250,
+              display: "flex",
+              justifyContent: "center",
+              marginBottom: "min(4vw, 24px)",
+              position: "absolute",
+              bottom: 15,
+            }}
+          >
+            <img
+              src={logosFooter}
+              alt="Patrocinadores"
+              crossOrigin="anonymous"
+              style={{ width: "100%", maxWidth: 300 }}
+              draggable={false}
+            />
+          </div>
+        </div>
+      </div>
+      {/* ⬆️ FIN ÁREA CAPTURADA */}
+
+{/* ⬇️ OVERLAY CENTRADO (NO se captura) */}
+<motion.div
+  initial={{ opacity: 0, scale: 0.98 }}
+  animate={{ opacity: 1, scale: 1 }}
+  transition={{ duration: 0.4 }}
+  style={{
+    position: "absolute",
+    inset: 0,
+    pointerEvents: "none",
+    width: "100%",
+  }}
+>
+  {uploading || generating ? (
+    <div
+      style={{
+        position: "absolute",
+        left: "50%",
+        bottom: 300,
+        transform: "translateX(-50%)",
+        display: "grid",
+        placeItems: "center",
+        rowGap: 10,
+        pointerEvents: "auto",
+      }}
+    >
+      <Text size="sm" c="#fff" style={{ textAlign: "center" }}>
+        {uploading ? "Procesando imagen..." : "Generando tu imagen..."}
+      </Text>
+    </div>
+  ) : qrUrl ? (
+    // QR + texto lado a lado, centrados y abajo
+    <div
+      style={{
+        position: "absolute",
+        left: "50%",
+        bottom: 250,
+        transform: "translateX(-50%)",
+        display: "flex",
+        alignItems: "center",
+        gap: 20,  
+        padding: 0,
+        background: "transparent",
+        pointerEvents: "auto",
+      }}
+    >
+      {/* QR a la izquierda */}
+      <img
+        src={qrUrl}
+        alt="QR descarga"
         style={{
-          width: "100%",
-          textAlign: "center",
-          marginBottom: "min(7vw, 28px)",
-          paddingInline: 12,
-          flexShrink: 0,
+          width: 100,
+          height: 100,
+          background: "#fff",
+          boxShadow: "0 0 16px #2AB8FF66",
           userSelect: "none",
+          flexShrink: 0,
+        }}
+        draggable={false}
+      />
+
+      {/* Texto a la derecha */}
+      <Text
+        size="sm"
+        c="#fff"
+        style={{
+          lineHeight: 1.2,
+          textAlign: "left",
+          textShadow: "0 2px 8px rgba(0,0,0,.25)",
         }}
       >
-        <Text
-          style={{
-            color: "#fff",
-            fontWeight: 600,
-            fontSize: "clamp(1.15rem, 4vw, 24px)",
-            textShadow: "0 2px 6px #19193940",
-            marginBottom: 0,
-            lineHeight: 1.24,
-            paddingInline: "50px",
-          }}
-        >
-          Estás a solo un paso de crear tu GOAT ideal en la siguiente actividad.
-        </Text>
-      </motion.div>
+        Escanea para
+        <br />
+        descargar
+        <br />
+        tu imagen
+      </Text>
+    </div>
+  ) : null}
+</motion.div>
+{/* ⬆️ OVERLAY CENTRADO */}
 
-      {/* Botón Reiniciar */}
+
+      {/* Botón Reiniciar (visible en UI, NO se captura) */}
       <motion.button
         onClick={onRestart}
-        whileHover={{ scale: 1.05, boxShadow: "0 6px 20px #8ad5f7cc" }}
+        whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         style={{
-          position: "fixed",
-          top: "0",
-          left: "0",
-          width: 48,
-          height: 48,
-          padding: 0,
-          borderRadius: 14,
+          position: "absolute",
+          top: 8,
+          left: 8,
+          width: 44,
+          height: 44,
+          borderRadius: 12,
           border: "none",
+          background: "transparent",
           cursor: "pointer",
-          background: "none",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 0,
         }}
       >
         <img
           src="/reiniciar.png"
           alt="Reiniciar"
-          style={{
-            width: 28,
-            height: 28,
-            objectFit: "contain",
-            pointerEvents: "none",
-            userSelect: "none",
-          }}
+          style={{ width: 26, height: 26 }}
           draggable={false}
         />
       </motion.button>
-
-      {/* Logos patrocinadores footer */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, delay: 0.6 }}
-        style={{
-          width: "100%",
-          maxWidth: 350,
-          paddingInline: 12,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "flex-end",
-          marginBottom: "min(4vw, 24px)",
-          flexShrink: 0,
-          userSelect: "none",
-        }}
-      >
-        <img
-          src={logosFooter}
-          alt="Patrocinadores"
-          style={{
-            width: "100%",
-            maxWidth: 350,
-            height: "auto",
-            opacity: 0.98,
-            pointerEvents: "none",
-            display: "block",
-          }}
-          draggable={false}
-        />
-      </motion.div>
     </motion.div>
   );
 }
