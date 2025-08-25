@@ -323,7 +323,7 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
             style={{
               position: "absolute",
               left: "50%",
-              bottom: 350,
+              bottom: 250,
               transform: "translateX(-50%)",
               display: "grid",
               placeItems: "center",
@@ -340,7 +340,7 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
             style={{
               position: "absolute",
               left: "50%",
-              bottom: 300,
+              bottom: 220,
               transform: "translateX(-50%)",
               display: "flex",
               alignItems: "center",

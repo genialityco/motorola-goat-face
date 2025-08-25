@@ -7,17 +7,18 @@ import frameSrc from "/ESCUDO.png";
 import logo from "/LOGOS_SUPERIOR.png";
 import logosFooter from "/LOGOS.png";
 
-// Marco con máscara de escudo y foto centrada
-function ShieldPhoto({ src, size = 360 }: { src: string; size?: number }) {
+// Marco con máscara de escudo y foto centrada (FULL responsive)
+function ShieldPhoto({ src }: { src: string }) {
   const W = 438;
   const H = 454;
 
   return (
     <div
+      className="shield"
       style={{
         position: "relative",
-        width: size,
-        height: size,
+        width: "clamp(240px, 38vw, 560px)",
+        aspectRatio: `${W} / ${H}`, // mantiene proporción del marco
         display: "grid",
         placeItems: "center",
       }}
@@ -34,7 +35,6 @@ function ShieldPhoto({ src, size = 360 }: { src: string; size?: number }) {
             d="M219,18C300,45 354,62 394,70L394,260C394,342 305,405 219,438C133,405 44,342 44,260L44,70C84,62 138,45 219,18Z"
           />
         </mask>
-
         <image
           href={src}
           width={W}
@@ -47,6 +47,7 @@ function ShieldPhoto({ src, size = 360 }: { src: string; size?: number }) {
       <img
         src={frameSrc}
         alt="Marco"
+        loading="lazy"
         style={{
           position: "absolute",
           inset: 0,
@@ -108,14 +109,15 @@ export default function DownloadFrame() {
       <img
         src={logo}
         alt="Logo"
+        loading="lazy"
         style={{
-          width: "min(80vw, 320px)",
+          width: "min(80vw, 340px)",
           height: "auto",
           objectFit: "contain",
         }}
       />
 
-      {/* Centro: marco + foto (centrado) */}
+      {/* Centro: marco + foto (centrado y responsive) */}
       <div
         style={{
           display: "grid",
@@ -124,27 +126,16 @@ export default function DownloadFrame() {
           height: "100%",
         }}
       >
-        {photoUrl && (
-          <ShieldPhoto
-            src={photoUrl}
-            size={typeof window !== "undefined" ? undefined : 360}
-          />
-        )}
-
-        {/* Tamaño responsivo del marco */}
-        <style>{`
-          @media (min-width: 0px) {
-            .shield-size { width: clamp(260px, 38vw, 520px); height: clamp(260px, 38vw, 520px); }
-          }
-        `}</style>
+        {photoUrl && <ShieldPhoto src={photoUrl} />}
       </div>
 
       {/* Footer logos */}
       <img
         src={logosFooter}
         alt="Patrocinadores"
+        loading="lazy"
         style={{
-          width: "min(70vw, 280px)",
+          width: "min(70vw, 300px)",
           height: "auto",
           marginTop: "auto",
           marginBottom: "max(12px, env(safe-area-inset-bottom))",
@@ -169,7 +160,8 @@ export default function DownloadFrame() {
           fontWeight: 700,
           cursor: "pointer",
           boxShadow: "0 6px 16px rgba(0,0,0,.25)",
-          fontSize: "clamp(5px, 2.5vw, 18px)",
+          fontSize: "clamp(10px, 2.3vw, 16px)",
+          padding: "clamp(6px, 1.5vw, 10px) clamp(10px, 2vw, 16px)",
         }}
       >
         Descargar imagen
