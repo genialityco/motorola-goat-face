@@ -134,6 +134,7 @@ export default function StepUploadPhoto({ next }: Props) {
             draggable={false}
             animate={{ scale: [1, 1.04, 1], y: [0, -14, 0] }}
             transition={{ duration: 2.3, repeat: Infinity, ease: "easeInOut" }}
+            style={{opacity: 0.5}}
           />
 
           {/* Imagen superior dentro del marco */}
