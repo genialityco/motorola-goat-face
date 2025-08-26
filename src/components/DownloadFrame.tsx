@@ -4,8 +4,6 @@ import * as htmlToImage from "html-to-image";
 import { useSearchParams } from "react-router-dom";
 
 import frameSrc from "/ESCUDO.png";
-import logo from "/LOGOS_SUPERIOR.png";
-import logosFooter from "/LOGOS.png";
 
 // Marco con máscara de escudo y foto centrada (FULL responsive)
 function ShieldPhoto({ src }: { src: string }) {
@@ -17,8 +15,8 @@ function ShieldPhoto({ src }: { src: string }) {
       className="shield"
       style={{
         position: "relative",
-        width: "clamp(240px, 38vw, 560px)",
-        aspectRatio: `${W} / ${H}`, // mantiene proporción del marco
+        width: "clamp(280px, 38vw, 560px)",
+        aspectRatio: `${W} / ${H}`,
         display: "grid",
         placeItems: "center",
       }}
@@ -26,13 +24,19 @@ function ShieldPhoto({ src }: { src: string }) {
       <svg
         viewBox={`0 0 ${W} ${H}`}
         preserveAspectRatio="xMidYMid meet"
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "65%",
+          height: "100%",
+          marginLeft: "50px",
+        }}
       >
         <mask id="shieldMask" maskUnits="userSpaceOnUse">
           <rect width={W} height={H} fill="black" />
           <path
             fill="white"
-            d="M219,18C300,45 354,62 394,70L394,260C394,342 305,405 219,438C133,405 44,342 44,260L44,70C84,62 138,45 219,18Z"
+            d="M219,18C300,45 354,62 384,70L384,260C384,332 285,405 219,438C153,405 54,332 54,260L54,70C94,62 138,45 219,18Z"
           />
         </mask>
         <image
@@ -95,28 +99,14 @@ export default function DownloadFrame() {
       style={{
         width: "100vw",
         height: "100vh",
-        background: "url('/FONDO-AZUL_01.png') center/cover no-repeat",
+        background:
+          "url('/FONDO_ENTREGABLE_MOTOROLA.png') center/cover no-repeat",
         display: "grid",
-        gridTemplateRows: "auto 1fr auto",
-        justifyItems: "center",
-        alignItems: "center",
+        placeItems: "center",
         padding: "clamp(12px, 3vw, 28px)",
         boxSizing: "border-box",
-        gap: "clamp(8px, 2vw, 16px)",
       }}
     >
-      {/* Logo top */}
-      <img
-        src={logo}
-        alt="Logo"
-        loading="lazy"
-        style={{
-          width: "min(80vw, 340px)",
-          height: "auto",
-          objectFit: "contain",
-        }}
-      />
-
       {/* Centro: marco + foto (centrado y responsive) */}
       <div
         style={{
@@ -128,20 +118,6 @@ export default function DownloadFrame() {
       >
         {photoUrl && <ShieldPhoto src={photoUrl} />}
       </div>
-
-      {/* Footer logos */}
-      <img
-        src={logosFooter}
-        alt="Patrocinadores"
-        loading="lazy"
-        style={{
-          width: "min(70vw, 300px)",
-          height: "auto",
-          marginTop: "auto",
-          marginBottom: "max(12px, env(safe-area-inset-bottom))",
-          objectFit: "contain",
-        }}
-      />
 
       {/* Botón fijo (excluido de la captura) */}
       <motion.button
