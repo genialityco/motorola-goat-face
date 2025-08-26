@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useMemo, useState } from "react";
 import { Text } from "@mantine/core";
 import { motion } from "framer-motion";
+import QRCode from "react-qr-code";
 
 const logo = "/LOGOS_SUPERIOR.png";
 const logosFooter = "/LOGOS.png";
@@ -14,6 +16,10 @@ interface StepFinishProps {
 }
 
 const SERVER_URL = "https://moto-ai-server-wd9gh.ondigitalocean.app";
+
+// Dominio base público (evita que el QR apunte a localhost en el teléfono)
+const BASE_URL =
+  (import.meta as any)?.env?.VITE_PUBLIC_BASE_URL || window.location.origin;
 
 // --- Upload helpers ---
 async function uploadBase64ToFirebase(base64: string): Promise<string | null> {
@@ -164,18 +170,17 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
 
   const imageToShow = firebaseUrl || avatarFinal;
 
-  // 2) QR: apunta al nuevo componente de descarga con la url de la foto
-  const qrUrl = useMemo(() => {
+  // 2) QR: apunta al nuevo componente de descarga con la url de la foto (SVG local)
+  const qrTarget = useMemo(() => {
     if (!firebaseUrl) return null;
-    const target = `${window.location.origin}/download-frame?url=${encodeURIComponent(
-      firebaseUrl
-    )}`;
-    return `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
-      target
-    )}&size=180x180`;
+    return `${BASE_URL}/download-frame?url=${encodeURIComponent(firebaseUrl)}`;
   }, [firebaseUrl]);
 
-  const FRAME_MAX = 200;
+  // Tamaño del escudo adaptativo
+  const FRAME_SIZE =
+    typeof window !== "undefined"
+      ? Math.round(Math.max(180, Math.min(320, window.innerWidth * 0.48)))
+      : 220;
 
   return (
     <motion.div
@@ -190,203 +195,152 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
         minHeight: "100dvh",
         overflow: "hidden",
         boxSizing: "border-box",
+        backgroundImage: 'url("/FONDO-AZUL_01.png")',
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
-      {/* ⬇️ CONTENEDOR VISIBLE (sin captura) */}
+      {/* Contenedor principal en flujo */}
       <div
         style={{
-          position: "relative",
-          width: "100vw",
-          height: "100vh",
-          minHeight: "100dvh",
-          backgroundImage: 'url("/FONDO-AZUL_01.png")',
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
+          width: "100%",
+          maxWidth: 720,
+          marginInline: "auto",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "space-between",
-          paddingTop: "env(safe-area-inset-top, 20px)",
-          paddingBottom: "env(safe-area-inset-bottom, 20px)",
-          boxSizing: "border-box",
+          padding: "min(5vw, 24px)",
+          gap: 16,
+          flex: 1, // ocupa alto disponible
         }}
       >
-        <div
+        {/* Top logo */}
+        <img
+          src={logo}
+          alt="Logo moto ai"
+          crossOrigin="anonymous"
           style={{
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 16,
+            width: "min(90vw, 400px)",
+            maxWidth: 350,
+            marginTop: "min(6vw, 24px)",
+          }}
+          draggable={false}
+        />
+
+        {/* Marco */}
+        <ShieldPhoto src={imageToShow} size={FRAME_SIZE} MASK_INSET={12} OFFSET_Y={-4} />
+
+        {/* Título */}
+        <Text
+          style={{
+            color: "#fff",
+            fontWeight: 700,
+            fontSize: "clamp(1.25rem, 3.5vw, 24px)",
+            textShadow: "0 2px 6px #19193940",
+            marginBottom: 0,
+            lineHeight: 1.24,
+            textAlign: "center",
           }}
         >
-          {/* Top logo */}
-          <img
-            src={logo}
-            alt="Logo moto ai"
-            crossOrigin="anonymous"
-            style={{
-              width: "min(90vw, 400px)",
-              maxWidth: 350,
-              marginTop: "min(10vw, 30px)",
-            }}
-            draggable={false}
-          />
+          ¡Listo!
+        </Text>
 
-          {/* Escudo */}
-          <ShieldPhoto
-            src={imageToShow}
-            size={Math.min(520, FRAME_MAX)}
-            MASK_INSET={12}
-            OFFSET_Y={-4}
-          />
+        {/* Texto inferior (SVG) — en flujo, sin absolute */}
+        <img
+          src="/TEXTOS-05.svg"
+          alt="Texto GOAT"
+          crossOrigin="anonymous"
+          style={{
+            width: "min(70vw, 320px)",
+            height: "auto",
+            opacity: 0.95,
+            display: "block",
+            userSelect: "none",
+            pointerEvents: "none",
+          }}
+          draggable={false}
+        />
 
-          {/* Título */}
-          <Text
-            style={{
-              color: "#fff",
-              fontWeight: 700,
-              fontSize: "clamp(1.5rem, 4vw, 24px)",
-              textShadow: "0 2px 6px #19193940",
-              marginBottom: 0,
-              lineHeight: 1.24,
-            }}
-          >
-            ¡Listo!
-          </Text>
-
-          {/* Texto inferior (SVG) */}
-          <div
-            style={{
-              width: "100%",
-              display: "flex",
-              justifyContent: "center",
-              marginTop: 6,
-            }}
-          >
-            <img
-              src="/TEXTOS-05.svg"
-              alt="Texto GOAT"
-              crossOrigin="anonymous"
-              style={{
-                width: "min(70vw, 320px)",
-                height: "auto",
-                opacity: 0.95,
-                display: "block",
-                userSelect: "none",
-                pointerEvents: "none",
-                position: "absolute",
-                bottom: 145,
-              }}
-            />
-          </div>
-
-          {/* Footer logos */}
-          <div
-            style={{
-              width: "100%",
-              maxWidth: 250,
-              display: "flex",
-              justifyContent: "center",
-              marginBottom: "min(4vw, 24px)",
-              position: "absolute",
-              bottom: 15,
-            }}
-          >
-            <img
-              src={logosFooter}
-              alt="Patrocinadores"
-              crossOrigin="anonymous"
-              style={{ width: "100%", maxWidth: 300 }}
-              draggable={false}
-            />
-          </div>
-        </div>
-      </div>
-      {/* ⬆️ FIN ÁREA VISIBLE */}
-
-      {/* ⬇️ OVERLAY (QR o estado) */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4 }}
-        style={{
-          position: "absolute",
-          inset: 0,
-          pointerEvents: "none",
-          width: "100%",
-        }}
-      >
-        {uploading ? (
-          <div
-            style={{
-              position: "absolute",
-              left: "50%",
-              bottom: 250,
-              transform: "translateX(-50%)",
-              display: "grid",
-              placeItems: "center",
-              rowGap: 10,
-              pointerEvents: "auto",
-            }}
-          >
+        {/* Bloque QR | Texto */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+            marginTop: 8,
+            flexWrap: "wrap",
+            justifyContent: "center",
+            minHeight: 100,
+          }}
+        >
+          {uploading ? (
             <Text size="sm" c="#fff" style={{ textAlign: "center" }}>
               Procesando imagen...
             </Text>
-          </div>
-        ) : qrUrl ? (
-          <div
-            style={{
-              position: "absolute",
-              left: "50%",
-              bottom: 220,
-              transform: "translateX(-50%)",
-              display: "flex",
-              alignItems: "center",
-              gap: 20,
-              padding: 0,
-              background: "transparent",
-              pointerEvents: "auto",
-            }}
-          >
-            {/* QR */}
-            <img
-              src={qrUrl}
-              alt="QR descarga"
-              style={{
-                width: 100,
-                height: 100,
-                background: "#fff",
-                boxShadow: "0 0 16px #2AB8FF66",
-                userSelect: "none",
-                flexShrink: 0,
-              }}
-              draggable={false}
-            />
+          ) : qrTarget ? (
+            <>
+              <div
+                style={{
+                  width: "clamp(90px, 14vw, 120px)",
+                  height: "clamp(90px, 14vw, 120px)",
+                  background: "#fff",
+                  boxShadow: "0 0 16px #2AB8FF66",
+                  display: "grid",
+                  placeItems: "center",
+                  borderRadius: 6,
+                  flexShrink: 0,
+                }}
+              >
+                <QRCode value={qrTarget} size={120} style={{ width: "85%", height: "85%" }} />
+              </div>
 
-            {/* Texto */}
-            <Text
-              size="sm"
-              c="#fff"
-              style={{
-                lineHeight: 1.2,
-                textAlign: "left",
-                textShadow: "0 2px 8px rgba(0,0,0,.25)",
-              }}
-            >
-              Escanea para
-              <br />
-              ir a descargar
-              <br />
-              tu imagen
-            </Text>
-          </div>
-        ) : null}
-      </motion.div>
-      {/* ⬆️ OVERLAY */}
+              <Text
+                size="sm"
+                c="#fff"
+                style={{
+                  lineHeight: 1.25,
+                  textAlign: "left",
+                  textShadow: "0 2px 8px rgba(0,0,0,.25)",
+                  fontSize: "clamp(12px, 2.4vw, 14px)",
+                }}
+              >
+                Escanea para
+                <br />
+                ir a descargar
+                <br />
+                tu imagen
+              </Text>
+            </>
+          ) : null}
+        </div>
 
-      {/* Botón Reiniciar (visible en UI) */}
+        {/* Empuja el footer hacia abajo */}
+        <div style={{ marginTop: "auto" }} />
+
+        {/* Footer logos */}
+        <div
+          style={{
+            width: "100%",
+            maxWidth: 280,
+            display: "flex",
+            justifyContent: "center",
+            paddingBottom: "min(4vw, 24px)",
+          }}
+        >
+          <img
+            src={logosFooter}
+            alt="Patrocinadores"
+            crossOrigin="anonymous"
+            style={{ width: "100%", maxWidth: 300 }}
+            draggable={false}
+          />
+        </div>
+      </div>
+
+      {/* Botón Reiniciar */}
       <motion.button
         onClick={onRestart}
         whileHover={{ scale: 1.05 }}
