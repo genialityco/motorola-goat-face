@@ -37,7 +37,9 @@ async function uploadBase64ToFirebase(base64: string): Promise<string | null> {
     return null;
   }
 }
-async function uploadDriveUrlToFirebase(driveUrl: string): Promise<string | null> {
+async function uploadDriveUrlToFirebase(
+  driveUrl: string
+): Promise<string | null> {
   try {
     const res = await fetch(`${SERVER_URL}/upload-drive-to-firebase`, {
       method: "POST",
@@ -54,68 +56,52 @@ async function uploadDriveUrlToFirebase(driveUrl: string): Promise<string | null
 }
 
 /** Foto recortada con máscara de escudo (438×454) + PNG del marco encima */
-function ShieldPhoto({
-  src,
-  size = 200,
-  MASK_INSET = 12,
-  OFFSET_Y = -4,
-}: {
-  src: string;
-  size?: number;
-  MASK_INSET?: number;
-  OFFSET_Y?: number;
-}) {
+/** Foto recortada con máscara de escudo (FULL responsive, igual a DownloadFrame) */
+function ShieldPhoto({ src }: { src: string }) {
   const W = 438;
   const H = 454;
-  const sx = (W - MASK_INSET * 2) / W;
-  const sy = (H - MASK_INSET * 2) / H;
-  const tx = MASK_INSET;
-  const ty = MASK_INSET;
 
   return (
-    <div style={{ position: "relative", width: size, height: size }}>
+    <div
+      style={{
+        position: "relative",
+        width: "clamp(200px, 40vw, 320px)",
+        aspectRatio: `${W} / ${H}`,
+        display: "grid",
+        placeItems: "center",
+      }}
+    >
       <svg
         viewBox={`0 0 ${W} ${H}`}
         preserveAspectRatio="xMidYMid meet"
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "65%",
+          height: "100%",
+          marginLeft: "35px",
+        }}
       >
-        <defs>
-          <mask id="shieldMask" maskUnits="userSpaceOnUse">
-            <rect x="0" y="0" width={W} height={H} fill="black" />
-            <g transform={`translate(${tx},${ty}) scale(${sx} ${sy})`}>
-              <path
-                fill="white"
-                d="
-                  M219,18
-                  C 300,45 354,62 394,70
-                  L 394,260
-                  C 394,342 305,405 219,438
-                  C 133,405 44,342 44,260
-                  L 44,70
-                  C 84,62 138,45 219,18
-                  Z
-                "
-              />
-            </g>
-          </mask>
-        </defs>
-
+        <mask id="shieldMask" maskUnits="userSpaceOnUse">
+          <rect width={W} height={H} fill="black" />
+          <path
+            fill="white"
+            d="M219,18C300,45 354,62 384,70L384,260C384,332 285,405 219,438C153,405 54,332 54,260L54,70C94,62 138,45 219,18Z"
+          />
+        </mask>
         <image
           href={src}
-          x="0"
-          y="0"
           width={W}
           height={H}
           preserveAspectRatio="xMidYMid slice"
           mask="url(#shieldMask)"
-          style={{ transform: `translateY(${OFFSET_Y}px)` }}
         />
       </svg>
 
       <img
         src={frameSrc}
-        alt="Marco escudo"
-        crossOrigin="anonymous"
+        alt="Marco"
+        loading="lazy"
         style={{
           position: "absolute",
           inset: 0,
@@ -124,8 +110,6 @@ function ShieldPhoto({
           objectFit: "contain",
           pointerEvents: "none",
           userSelect: "none",
-          filter:
-            "drop-shadow(0 10px 24px rgba(27,164,253,0.28)) drop-shadow(0 -6px 18px rgba(255,102,52,0.18))",
         }}
         draggable={false}
       />
@@ -177,10 +161,10 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
   }, [firebaseUrl]);
 
   // Tamaño del escudo adaptativo
-  const FRAME_SIZE =
-    typeof window !== "undefined"
-      ? Math.round(Math.max(180, Math.min(320, window.innerWidth * 0.48)))
-      : 220;
+  // const FRAME_SIZE =
+  //   typeof window !== "undefined"
+  //     ? Math.round(Math.max(180, Math.min(320, window.innerWidth * 0.48)))
+  //     : 220;
 
   return (
     <motion.div
@@ -231,7 +215,12 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
         />
 
         {/* Marco */}
-        <ShieldPhoto src={imageToShow} size={FRAME_SIZE} MASK_INSET={12} OFFSET_Y={-4} />
+        <ShieldPhoto
+          src={imageToShow}
+          // size={FRAME_SIZE}
+          // MASK_INSET={12}
+          // OFFSET_Y={-4}
+        />
 
         {/* Título */}
         <Text
@@ -240,7 +229,6 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
             fontWeight: 700,
             fontSize: "clamp(1.25rem, 3.5vw, 24px)",
             textShadow: "0 2px 6px #19193940",
-            marginBottom: 0,
             lineHeight: 1.24,
             textAlign: "center",
           }}
@@ -254,7 +242,7 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
           alt="Texto GOAT"
           crossOrigin="anonymous"
           style={{
-            width: "min(70vw, 320px)",
+            width: "min(60vw, 320px)",
             height: "auto",
             opacity: 0.95,
             display: "block",
@@ -270,7 +258,6 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
             display: "flex",
             alignItems: "center",
             gap: 16,
-            marginTop: 8,
             flexWrap: "wrap",
             justifyContent: "center",
             minHeight: 100,
@@ -284,8 +271,8 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
             <>
               <div
                 style={{
-                  width: "clamp(90px, 14vw, 120px)",
-                  height: "clamp(90px, 14vw, 120px)",
+                  width: "clamp(120px, 14vw, 120px)",
+                  height: "clamp(120px, 14vw, 120px)",
                   background: "#fff",
                   boxShadow: "0 0 16px #2AB8FF66",
                   display: "grid",
@@ -294,7 +281,11 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
                   flexShrink: 0,
                 }}
               >
-                <QRCode value={qrTarget} size={120} style={{ width: "85%", height: "85%" }} />
+                <QRCode
+                  value={qrTarget}
+                  size={250}
+                  style={{ width: "90%", height: "90%" }}
+                />
               </div>
 
               <Text
@@ -324,7 +315,7 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
         <div
           style={{
             width: "100%",
-            maxWidth: 280,
+            maxWidth: 230,
             display: "flex",
             justifyContent: "center",
             paddingBottom: "min(4vw, 24px)",
@@ -334,7 +325,7 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
             src={logosFooter}
             alt="Patrocinadores"
             crossOrigin="anonymous"
-            style={{ width: "100%", maxWidth: 300 }}
+            style={{ width: "100%", maxWidth: 280 }}
             draggable={false}
           />
         </div>
