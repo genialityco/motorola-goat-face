@@ -15,7 +15,8 @@ function ShieldPhoto({ src }: { src: string }) {
       className="shield"
       style={{
         position: "relative",
-        width: "clamp(280px, 38vw, 560px)",
+        // Escala fluida del escudo: mínimo 260px, crece con viewport, máximo 560px
+        width: "clamp(260px, 38vw, 560px)",
         aspectRatio: `${W} / ${H}`,
         display: "grid",
         placeItems: "center",
@@ -27,9 +28,12 @@ function ShieldPhoto({ src }: { src: string }) {
         style={{
           position: "absolute",
           inset: 0,
-          width: "65%",
+          // >> ANTES: width: "65%", marginLeft: "50px"
+          // Ahora fluidos: la foto ocupa ~64–70% del ancho del escudo
+          // y el corrimiento lateral se ajusta con el tamaño de pantalla.
+          width: "clamp(62%, 66%, 70%)",
           height: "100%",
-          marginLeft: "50px",
+          marginLeft: "clamp(4%, 20%, 17.5%)",
         }}
       >
         <mask id="shieldMask" maskUnits="userSpaceOnUse">
@@ -67,6 +71,7 @@ function ShieldPhoto({ src }: { src: string }) {
   );
 }
 
+
 export default function DownloadFrame() {
   const [params] = useSearchParams();
   const photoUrl = params.get("url"); // ?url=...
@@ -89,18 +94,34 @@ export default function DownloadFrame() {
     link.href = dataUrl;
     link.click();
   };
+  const BG_W = 1080;
+const BG_H = 1920;
 
   return (
+    <>
+    
+      <style>
+      {`
+        .bg-containX-coverY {
+          background: url('/FONDO_ENTREGABLE_MOTOROLA.png') center no-repeat;
+          background-size: 100% auto; /* contiene al ancho */
+        }
+        @media (max-aspect-ratio: ${BG_W}/${BG_H}) {
+          .bg-containX-coverY {
+            background-size: auto 100%; /* cubre al alto si el viewport es más estrecho */
+          }
+        }
+      `}
+    </style>
     <motion.div
       ref={captureRef}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
+      className="bg-containX-coverY"
       style={{
         width: "100vw",
         height: "100vh",
-        background:
-          "url('/FONDO_ENTREGABLE_MOTOROLA.png') center/cover no-repeat",
         display: "grid",
         placeItems: "center",
         padding: "clamp(12px, 3vw, 28px)",
@@ -143,5 +164,6 @@ export default function DownloadFrame() {
         Descargar imagen
       </motion.button>
     </motion.div>
+    </>
   );
 }
