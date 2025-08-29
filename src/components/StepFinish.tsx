@@ -59,7 +59,7 @@ function ShieldPhoto({ src }: { src: string }) {
     <div
       style={{
         position: "relative",
-        width: "clamp(200px, 40vw, 320px)",
+        width: "clamp(280px, 54vw, 560px)",
         aspectRatio: `${W} / ${H}`,
         display: "grid",
         placeItems: "center",
@@ -270,7 +270,7 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
                   alt="Texto GOAT"
                   crossOrigin="anonymous"
                   style={{
-                    width: "min(60vw, 360px)",
+                    width: "min(80vw, 480px)",
                     height: "auto",
                     opacity: 0.95,
                     display: "block",
@@ -336,10 +336,10 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
                       placeItems: "center",
                       background: "#ffffff",
                       borderRadius: 16,
-                      padding: "14px",
+                      padding: "0px",
                       border: "6px solid #fff",
-                      width: "clamp(220px, 34vw, 300px)",
-                      height: "clamp(220px, 34vw, 300px)",
+                      width: "clamp(260px, 48vw, 420px)",
+                      height: "clamp(260px, 48vw, 420px)",
                       boxShadow:
                         "0 10px 24px rgba(0,0,0,.25), 0 0 24px rgba(42,184,255,.28)",
                     }}
