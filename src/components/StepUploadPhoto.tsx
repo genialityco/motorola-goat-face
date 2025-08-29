@@ -252,7 +252,7 @@ export default function StepUploadPhoto({ next }: Props) {
 
         .step-welcome-logo {
           transform: translateX(-50%);
-          width: 250px;
+          width: 350px;
           z-index: 3;
           pointer-events: none;
           margin-bottom: 20px;

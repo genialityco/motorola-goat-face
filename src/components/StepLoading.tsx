@@ -297,7 +297,7 @@ export default function StepLoading({ next }: { next: () => void }) {
         
         .step-welcome-logo {
           transform: translateX(-50%);
-          width: 250px;       /* ajusta el tamaño del logo */
+          width: 350px;       /* ajusta el tamaño del logo */
           z-index: 3;         /* encima de la mujer pero debajo del botón */
           pointer-events: none;
           margin-bottom: 20px; /* Espacio entre el logo y la imagen */

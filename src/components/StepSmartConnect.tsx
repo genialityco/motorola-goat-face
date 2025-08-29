@@ -201,7 +201,7 @@ export default function StepSmartConnect({ next, setPhoto }: Props) {
         }
 
         .smart-header-logos {
-          width: 250px; margin-top: 6px; z-index: 3; pointer-events: none;
+          width: 350px; margin-top: 50px; z-index: 3; pointer-events: none;
         }
 
         /* ---- NUEVO LAYOUT CENTRAL ---- */

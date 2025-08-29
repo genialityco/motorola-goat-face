@@ -222,7 +222,7 @@ export default function StepFinish({ photo, onRestart }: StepFinishProps) {
           crossOrigin="anonymous"
           style={{
             width: "min(90vw, 400px)",
-            maxWidth: 350,
+            maxWidth: 400,
             marginTop: "min(6vw, 24px)",
             userSelect: "none",
           }}
