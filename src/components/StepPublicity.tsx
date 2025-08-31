@@ -3,11 +3,11 @@ import { motion } from "framer-motion";
 
 const background = "/FONDO-AZUL_01.png";
 const frameSrc = "/CUADRO-LOADING.png";   // Marco contenedor
-const topOverlay = "/LOADING.png";        // Imagen superior (loading) — ahora rota
+const topOverlay = "/LOADING.png";        // Imagen superior (loading) — rota
 const bottomOverlay = "/TEXTOS-03.svg";   // Imagen inferior
 
 export default function StepPublicity({ next }: { next: () => void }) {
-  // Avance automático a los 3s
+  // Avance automático a los 30s
   useEffect(() => {
     const t = setTimeout(() => next(), 3000);
     return () => clearTimeout(t);
@@ -40,7 +40,7 @@ export default function StepPublicity({ next }: { next: () => void }) {
 
           {/* Overlays dentro del marco */}
           <div className="publi-overlays" aria-hidden>
-            {/* Loading más pequeño + giro infinito */}
+            {/* Loading con giro infinito */}
             <motion.img
               src={topOverlay}
               alt=""
@@ -114,10 +114,10 @@ export default function StepPublicity({ next }: { next: () => void }) {
           align-items: center;
           z-index: 2;
           pointer-events: none;
-          padding: 11% 8%;
+          padding: 10% 8%;   /* menos padding para ganar área útil */
+          gap: 6%;           /* separación proporcional entre loading y texto */
         }
 
-        /* ⬇️ Loading más pequeño */
         .publi-overlay-top {
           width: 52%;
           max-width: 75%;
@@ -125,24 +125,27 @@ export default function StepPublicity({ next }: { next: () => void }) {
           object-fit: contain;
         }
 
+        /* TEXTOS-03 más grande */
         .publi-overlay-bottom {
-          width: 72%;
-          max-width: 88%;
+          width: 85%;        /* antes 72% */
+          max-width: 92%;    /* crece mejor en pantallas grandes */
           height: auto;
           object-fit: contain;
+          margin-bottom: 15%; /* un poco más de margen inferior */
         }
 
         @media (max-width: 768px) {
           .publi-card { width: 300px; }
-          .publi-overlays { padding: 12% 9%; }
+          .publi-overlays { padding: 11% 9%; gap: 7%; }
           .publi-overlay-top { width: 56%; }
-          .publi-overlay-bottom { width: 76%; }
+          .publi-overlay-bottom { width: 82%; }
         }
 
         @media (max-width: 420px) {
           .publi-card { width: 92vw; }
-          .publi-overlays { padding: 13% 10%; }
+          .publi-overlays { padding: 12% 10%; gap: 8%; }
           .publi-overlay-top { width: 58%; }
+          .publi-overlay-bottom { width: 86%; }
         }
       `}</style>
     </motion.div>

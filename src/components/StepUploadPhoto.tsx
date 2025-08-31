@@ -114,15 +114,42 @@ export default function StepUploadPhoto({ next }: Props) {
           ))}
         </div>
 
-        {/* Logo superior (si lo usas en este paso) */}
-        <motion.img
-          src="/LOGOS_SUPERIOR.png"
-          alt="Logo superior"
-          className="step-welcome-logo"
-          draggable={false}
-          animate={{ scale: [1, 1.04, 1], y: [0, -14, 0] }}
-          transition={{ duration: 2.3, repeat: Infinity, ease: "easeInOut" }}
-        />
+        <div className="step-welcome-logo-area">
+          <motion.img
+            src="/LOGOS_SUPERIOR.png"
+            alt="Logo superior"
+            className="step-welcome-logo-img"
+            draggable={false}
+            animate={{
+              scale: [1, 1.04, 1],
+              y: [0, -14, 0],
+            }}
+            transition={{
+              duration: 2.3,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+
+          <motion.video
+            src="/moto_ai.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            draggable={false}
+            className="step-welcome-logo-video"
+            animate={{
+              scale: [1, 1.04, 1],
+              y: [0, -14, 0],
+            }}
+            transition={{
+              duration: 2.3,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        </div>
 
         {/* Marco y contenido */}
         <div className="step-welcome-content">
@@ -134,7 +161,7 @@ export default function StepUploadPhoto({ next }: Props) {
             draggable={false}
             animate={{ scale: [1, 1.04, 1], y: [0, -14, 0] }}
             transition={{ duration: 2.3, repeat: Infinity, ease: "easeInOut" }}
-            style={{opacity: 0.5}}
+            style={{ opacity: 0.5 }}
           />
 
           {/* Imagen superior dentro del marco */}
@@ -256,6 +283,25 @@ export default function StepUploadPhoto({ next }: Props) {
           z-index: 3;
           pointer-events: none;
           margin-bottom: 20px;
+        }
+
+        .step-welcome-logo-area {
+          display: flex;
+          align-items: center;    /* los alinea en el eje vertical */
+          justify-content: center; /* los centra horizontalmente */
+          gap: 45px;              /* espacio entre logo y video */
+          margin-bottom: 20px;    /* espacio debajo */
+          z-index: 3;
+        }
+
+        .step-welcome-logo-img {
+          width: 140px; /* ajusta según necesites */
+          pointer-events: none;
+        }
+
+        .step-welcome-logo-video {
+          width: 120px; /* tamaño del video */
+          pointer-events: none;
         }
 
         /* Overlays dentro del marco */

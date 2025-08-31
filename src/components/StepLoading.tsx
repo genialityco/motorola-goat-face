@@ -18,7 +18,6 @@ function getRandomPolarCoord(radiusRange = [140, 180]) {
   };
 }
 
-
 export default function StepLoading({ next }: { next: () => void }) {
   const controls = useAnimation(); // Controla la animación del botón al hacer clic
 
@@ -114,22 +113,44 @@ export default function StepLoading({ next }: { next: () => void }) {
             />
           ))}
         </div>
-        {/* Logo superior */}
-        <motion.img
-          src="/LOGOS_SUPERIOR.png"
-          alt="Logo superior"
-          className="step-welcome-logo"
-          draggable={false}
-          animate={{
-            scale: [1, 1.04, 1],
-            y: [0, -14, 0],
-          }}
-          transition={{
-            duration: 2.3,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
+        
+        {/* Contenedor para logo superior y video */}
+        <div className="step-welcome-logo-area">
+          <motion.img
+            src="/LOGOS_SUPERIOR.png"
+            alt="Logo superior"
+            className="step-welcome-logo-img"
+            draggable={false}
+            animate={{
+              scale: [1, 1.04, 1],
+              y: [0, -14, 0],
+            }}
+            transition={{
+              duration: 2.3,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+
+          <motion.video
+            src="/moto_ai.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            draggable={false}
+            className="step-welcome-logo-video"
+            animate={{
+              scale: [1, 1.04, 1],
+              y: [0, -14, 0],
+            }}
+            transition={{
+              duration: 2.3,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        </div>
 
         {/* Contenedor para la imagen y el botón (para posicionamiento relativo) */}
         <div className="step-welcome-content">
@@ -205,7 +226,7 @@ export default function StepLoading({ next }: { next: () => void }) {
                 fontSize: "21px",
                 padding: "0",
                 boxShadow: "inset 0 4px 6px rgba(0,0,0,0.3)",
-                marginBottom: "21px"
+                marginBottom: "21px",
               }}
             >
               Iniciar
@@ -281,6 +302,25 @@ export default function StepLoading({ next }: { next: () => void }) {
           50% { opacity: 0.68; filter: blur(60px) brightness(1.20);}
           100% { opacity: 0.5; filter: blur(40px) brightness(1.13);}
         }
+        .step-welcome-logo-area {
+          display: flex;
+          align-items: center;    /* los alinea en el eje vertical */
+          justify-content: center; /* los centra horizontalmente */
+          gap: 45px;              /* espacio entre logo y video */
+          margin-bottom: 20px;    /* espacio debajo */
+          z-index: 3;
+        }
+
+        .step-welcome-logo-img {
+          width: 140px; /* ajusta según necesites */
+          pointer-events: none;
+        }
+
+        .step-welcome-logo-video {
+          width: 120px; /* tamaño del video */
+          pointer-events: none;
+        }
+
         .step-welcome-image {
           width: 340px;
           max-width: 92vw;
@@ -297,7 +337,7 @@ export default function StepLoading({ next }: { next: () => void }) {
         
         .step-welcome-logo {
           transform: translateX(-50%);
-          width: 350px;       /* ajusta el tamaño del logo */
+          width: 200px;       /* ajusta el tamaño del logo */
           z-index: 3;         /* encima de la mujer pero debajo del botón */
           pointer-events: none;
           margin-bottom: 20px; /* Espacio entre el logo y la imagen */

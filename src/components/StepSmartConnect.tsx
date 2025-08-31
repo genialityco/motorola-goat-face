@@ -35,11 +35,16 @@ export default function StepSmartConnect({ next, setPhoto }: Props) {
     socket.on("nueva-imagen", (data) => {
       setMensaje("Imagen recibida. Procesando…");
       setPhoto(data.url);
-      controls.start({ scale: [1, 0.95, 1.06, 1], transition: { duration: 0.38 } });
+      controls.start({
+        scale: [1, 0.95, 1.06, 1],
+        transition: { duration: 0.38 },
+      });
       next();
     });
     socket.on("connect_error", () => {
-      setMensaje("No hay conexión con el servidor. Puedes intentar manualmente.");
+      setMensaje(
+        "No hay conexión con el servidor. Puedes intentar manualmente."
+      );
     });
     return () => {
       socket.disconnect();
@@ -63,7 +68,11 @@ export default function StepSmartConnect({ next, setPhoto }: Props) {
       const res = await fetch(
         "https://script.google.com/macros/s/AKfycby3aJdFUhSotru_nT1lPBetzcSQ8JQHxBNrfAkflmHeUJKeqw4EI3kzEqTatkSdq8U/exec"
       );
-      setMensaje(res.ok ? "Petición enviada. Esperando transmisión…" : "Error solicitando imagen. Intenta de nuevo.");
+      setMensaje(
+        res.ok
+          ? "Petición enviada. Esperando transmisión…"
+          : "Error solicitando imagen. Intenta de nuevo."
+      );
     } catch {
       setMensaje("Error de conexión. Intenta de nuevo.");
     } finally {
@@ -85,18 +94,27 @@ export default function StepSmartConnect({ next, setPhoto }: Props) {
           <motion.span
             key={trail.seed}
             className="smart-trail"
-            initial={{ opacity: 0, scale: 0.4, left: trail.left, top: trail.top }}
+            initial={{
+              opacity: 0,
+              scale: 0.4,
+              left: trail.left,
+              top: trail.top,
+            }}
             animate={{
               opacity: [0, 0.7, 0],
               scale: [0.45, 1.05, 0.7],
               left: [
                 trail.left,
-                `calc(50% + ${Math.cos(trail.angle + 0.5) * (trail.radius + 25)}px)`,
+                `calc(50% + ${
+                  Math.cos(trail.angle + 0.5) * (trail.radius + 25)
+                }px)`,
                 trail.left,
               ],
               top: [
                 trail.top,
-                `calc(50% + ${Math.sin(trail.angle + 0.5) * (trail.radius + 25)}px)`,
+                `calc(50% + ${
+                  Math.sin(trail.angle + 0.5) * (trail.radius + 25)
+                }px)`,
                 trail.top,
               ],
               rotate: [0, 40, 0],
@@ -112,15 +130,42 @@ export default function StepSmartConnect({ next, setPhoto }: Props) {
         ))}
       </div>
 
-      {/* Logos arriba */}
-      <motion.img
-        src="/LOGOS_SUPERIOR.png"
-        alt="Logos"
-        className="smart-header-logos"
-        draggable={false}
-        animate={{ scale: [1, 1.04, 1], y: [0, -10, 0] }}
-        transition={{ duration: 2.3, repeat: Infinity, ease: "easeInOut" }}
-      />
+      <div className="step-welcome-logo-area">
+        <motion.img
+          src="/LOGOS_SUPERIOR.png"
+          alt="Logo superior"
+          className="step-welcome-logo-img"
+          draggable={false}
+          animate={{
+            scale: [1, 1.04, 1],
+            y: [0, -14, 0],
+          }}
+          transition={{
+            duration: 2.3,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+
+        <motion.video
+          src="/moto_ai.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          draggable={false}
+          className="step-welcome-logo-video"
+          animate={{
+            scale: [1, 1.04, 1],
+            y: [0, -14, 0],
+          }}
+          transition={{
+            duration: 2.3,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      </div>
 
       {/* CONTENEDOR CENTRAL: símbolo (un poco arriba del centro) + título debajo */}
       <div className="smart-stack">
@@ -163,7 +208,9 @@ export default function StepSmartConnect({ next, setPhoto }: Props) {
       </div>
 
       {/* Estado abajo, menos llamativo */}
-      <Text size="sm" className="smart-status">{mensaje}</Text>
+      <Text size="sm" className="smart-status">
+        {mensaje}
+      </Text>
 
       <style>{`
         .smart-bg {
@@ -265,6 +312,25 @@ export default function StepSmartConnect({ next, setPhoto }: Props) {
           color: rgba(255,255,255,.72); text-shadow: 0 1px 2px rgba(0,0,0,.25);
           font-weight: 500; font-size: 0.95rem; letter-spacing: .1px;
           z-index: 2; user-select: none;
+        }
+
+        .step-welcome-logo-area {
+          display: flex;
+          align-items: center;    /* los alinea en el eje vertical */
+          justify-content: center; /* los centra horizontalmente */
+          gap: 45px;              /* espacio entre logo y video */
+          z-index: 3;
+          margin-top: 10%
+        }
+
+        .step-welcome-logo-img {
+          width: 140px; /* ajusta según necesites */
+          pointer-events: none;
+        }
+
+        .step-welcome-logo-video {
+          width: 120px; /* tamaño del video */
+          pointer-events: none;
         }
 
         /* ---- RESPONSIVE ---- */
